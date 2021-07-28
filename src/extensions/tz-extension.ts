@@ -1,24 +1,34 @@
 import { GluegunToolbox } from 'gluegun'
+import { InMemorySigner } from '@taquito/signer'
+import {TezosToolkit} from '@taquito/taquito'
+
 
 module.exports = (toolbox: GluegunToolbox) => {
-    const { filesystem } = toolbox
+    const { filesystem, config } = toolbox
 
     const TEZOS_CONFIG = `${filesystem.cwd()}/.config/tezos.config.js`
 
-    let secretKey: string | false = false
+    let secretKey: {key: string, tzAddress: string} | false = false
 
-    const getSecretKey = async (): Promise<string | false> => {
+    const getSecretKey = async (): Promise<{key: string, tzAddress: string} | false> => {
         if (secretKey) return secretKey
         secretKey = await readSecretKey()
         return secretKey
     }
 
-    const readSecretKey = async (): Promise<string | false> => {
-        return filesystem.exists(TEZOS_CONFIG) && filesystem.readAsync(TEZOS_CONFIG)
+    const readSecretKey = async (): Promise<{key: string, tzAddress: string} | false> => {
+        return filesystem.exists(TEZOS_CONFIG) && filesystem.readAsync(TEZOS_CONFIG).then(res => JSON.parse(res))
     }
 
     const saveSecretKey = async (key): Promise<void> => {
-        return filesystem.writeAsync(TEZOS_CONFIG, key)
+        const Tezos = new TezosToolkit(config.hentools.rpcURL)
+
+        Tezos.setProvider({ signer: new InMemorySigner(key) })
+
+        const tzAddress = await Tezos.wallet.pkh()
+
+        const wallet = {key:`${key}`, tzAddress:`${tzAddress}`}
+        return filesystem.writeAsync(TEZOS_CONFIG, wallet)
     }
 
     const resetKey = async (): Promise<void> => {
