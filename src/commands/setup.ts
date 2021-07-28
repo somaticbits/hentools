@@ -7,9 +7,11 @@ SECRET KEY>`
 module.exports = {
     name: 'setup',
     alias: ['s'],
-    description: 'Setup your wallet, add your secret key.',
+    description: 'Setup your wallet, add your secret key. -r to reset key',
     run: async (toolbox: GluegunToolbox) => {
-        const { prompt, tz, print } = toolbox
+        const { prompt, tz, print, parameters } = toolbox
+
+        const options = parameters.options
 
         if ((await tz.getSecretKey()) === false) {
             const result = await prompt.ask({
@@ -24,6 +26,11 @@ module.exports = {
                 print.info('Secret key set.')
                 return
             }
+        }
+
+        if (options.r) {
+            tz.resetKey()
+            print.info('Secret key has been reset.')
         }
     }
 }
