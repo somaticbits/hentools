@@ -10,17 +10,12 @@ import { ObjktMetadata } from '../types'
 module.exports = {
     name: 'mint',
     alias: ['m'],
-    description: 'Mint artwork, either single or in batch',
+    description: 'Mint artwork(s), -s to swap directly after.',
     run: async (toolbox: GluegunToolbox) => {
-        const { parameters,
-                print,
-                prompt,
-                filesystem,
-                ipfs,
-                tz,
-                config } = toolbox
+        const { parameters, print, prompt, filesystem, ipfs, tz, config, http } = toolbox
 
         let folder = parameters.first
+        let options = parameters.options
 
         if (!folder) {
             const result = await prompt.ask({
@@ -45,7 +40,7 @@ module.exports = {
             return
         } else {
             Tezos.setProvider({
-                signer: new InMemorySigner(await tz.getSecretKey()),
+                signer: new InMemorySigner((await tz.getSecretKey())['key']),
             })
         }
 
@@ -80,19 +75,21 @@ module.exports = {
             royalties: number
         }[] = []
 
+        const creator =  (await tz.getSecretKey())['tzAddress']
+
         for (const record of records) {
             const metadata: ObjktMetadata = {
-                name: record.title,
+                name: record.name,
                 description: record.description,
-                tags: record.tags,
+                tags: record.tags.split(",").map(s => s.trim()),
                 symbol: config.hentools.defaultMetadata.symbol,
-                artifactUri: '',
+                artifactUri: '', // is added by .addToIpfs
                 displayUri: config.hentools.defaultMetadata.displayUri,
                 thumbnailUri: config.hentools.defaultMetadata.thumbnailUri,
-                creators: [record.creator],
+                creators: [creator],
                 formats: [
                     {
-                        uri: '',
+                        uri: '', // is added by .addToIpfs
                         mimeType: mime.lookup(record.file)
                     }
                 ],
@@ -102,8 +99,8 @@ module.exports = {
             }
 
             mintRecords.push({
-                creator: record.creator,
-                amount: record.qty,
+                creator: creator,
+                amount: record.mint_qty,
                 metaUri: await ipfs.addToIpfs(path.join(folder, record.file), metadata),
                 royalties: record.royalties
             })
@@ -112,7 +109,7 @@ module.exports = {
         const mintBatch = mintRecords.map((record) => ({
                     kind: OpKind.TRANSACTION,
                     ...minterContract.methods.mint_OBJKT(
-                        record.creator,
+                        creator,
                         record.amount,
                         Buffer.from(record.metaUri).toString('hex'),
                         record.royalties * 10
@@ -120,20 +117,75 @@ module.exports = {
                 }
             )) as WalletParamsWithKind[]
 
-        print.info(mintBatch)
-
         try {
             print.info(`Minting...`)
             const mintOperation = await Tezos.wallet.batch(mintBatch).send()
 
-            await mintOperation.confirmation(config.txConfirmations)
+            print.info(`Waiting for ${config.hentools.txConfirmations} confirmations, see https://tzstats.com/${mintOperation.opHash}`)
 
-            print.info(`Waiting for ${config.txConfirmations} confirmations, see https://tzstats.com/${mintOperation.opHash}`)
+            await mintOperation.confirmation(config.hentools.txConfirmations)
             print.info('Minting transaction confirmed!')
-            //
-            // const confirmations = await http.create({baseURL: 'https://api.better-call.dev'}).get(`/v1/opg/${mintOperation.opHash}`).then(result => {
-            //     return result.data
-            // })
+
+            if (options.s) {
+                print.info('')
+                spinner.start('Market contract loading...')
+
+                const marketContract = await Tezos.contract.at(config.hentools.hicetnuncNFTv2)
+
+                spinner.stop()
+                spinner.succeed('Market contract loaded')
+
+                spinner.start('Operator contract loading...')
+
+                const operatorContract = await Tezos.contract.at(config.hentools.hicetnuncOperator)
+
+                spinner.stop()
+                spinner.succeed('Operator contract loaded')
+
+                const confirmations = await http.create({baseURL: 'https://api.better-call.dev'}).get(`/v1/opg/${mintOperation.opHash}`).then(result => {
+                    return result.data
+                }) as []
+
+                const tokenIds: number[] = []
+
+                for (let i = 1; i < confirmations.length; i+=2) {
+                    // tslint:disable-next-line:radix
+                    tokenIds.push(parseInt(confirmations[i]['parameters'][0]['children'][2]['value']))
+                }
+
+                const swapRecords = await records.map((obj, i) => ({...obj, objkt: tokenIds[i]}))
+
+                const operatorBatch = await swapRecords.map((record) => ({
+                    kind: OpKind.TRANSACTION,
+                    ...operatorContract.methods.update_operators(
+                        [{add_operator: {
+                                owner: creator,
+                                operator: config.hentools.hicetnuncNFTv2,
+                                token_id: record.objkt
+                            }}]).toTransferParams({ amount: 0, mutez: true, storageLimit: 100 })
+                })) as WalletParamsWithKind[]
+
+                const nftBatch = await swapRecords.map((record) => ({
+                    kind: OpKind.TRANSACTION,
+                    ...marketContract.methods.swap(
+                        creator,
+                        record.swap_qty,
+                        record.objkt,
+                        record.royalties * 10,
+                        record.xtz * 1e6
+                    ).toTransferParams({ amount: 0, mutez: true, storageLimit: 250 })
+                })) as WalletParamsWithKind[]
+
+                const swapBatch = operatorBatch.flatMap((a,i) => [a, nftBatch[i]])
+
+                print.info('\nSwapping...')
+                const swapOperation = await Tezos.wallet.batch(swapBatch).send()
+
+                print.info(`Waiting for ${config.hentools.txConfirmations} confirmations, see https://tzstats.com/${swapOperation.opHash}`)
+
+                await swapOperation.confirmation(config.hentools.txConfirmations)
+                print.info('Swapping transaction confirmed!')
+            }
         } catch(e) {
             print.error(e)
         }
