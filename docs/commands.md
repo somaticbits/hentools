@@ -69,7 +69,25 @@ none
 Cancelling OBJKTs #1234 and #1345  
 ``hentools cancel 1234 1345``
 
-##hicdex
+## buy
+**NAME**
+buy
+
+**SYNOPSIS**  
+``buy objkt1 ...``
+
+**DESCRIPTION**  
+``buy`` objkt directly from creator. Batch buying is possible. Currently only one edition per NFT.   
+The buying process needs a confirmation before being activated (yes or No).
+
+**OPTIONS**  
+none
+
+**EXAMPLE**  
+Buying OBJKT #1234 and #19283  
+``hentools buy 1234 19283``
+
+## hicdex
 **NAME**  
 hicdex
 
@@ -86,10 +104,11 @@ Pull various informations from ``hicdex.com``. Used by the tools internally.
 
 **EXAMPLE**
 
+
+
 // TODO: burn
 
 // TODO: csv templates
 
-// TODO: buy NFT
 
 
