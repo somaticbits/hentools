@@ -60,7 +60,7 @@ cancel
 ``cancel objkt1 ...``
 
 **DESCRIPTION**  
-``cancel`` swaps by pulling latest swap ID from owner and cancelling swap
+``cancel`` swaps by pulling latest swap ID from owner and cancelling it
 
 **OPTIONS**  
 none
@@ -74,18 +74,17 @@ Cancelling OBJKTs #1234 and #1345
 hicdex
 
 **SYNOPSIS**  
-``hicdex [-c] [-s] [-r]``
+``hicdex [-c] [-s] [-r] objktId``
 
 **DESCRIPTION**  
-pull various informations from ``hicdex.com``. Used by the tools internally.
+Pull various informations from ``hicdex.com``. Used by the tools internally.
 
 **OPTIONS**  
-``-c``  
-``-s``  
-``-r``  
+``-c``  get the creator of the OBJKT  
+``-s``  get the latest Swap ID from the OBJKT from the wallet registered with hentools  
+``-r``  get the royalties from the OBJKT
 
 **EXAMPLE**
-
 
 // TODO: burn
 
