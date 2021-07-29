@@ -21,25 +21,18 @@ module.exports = (toolbox: GluegunToolbox) => {
         }
     }`
 
-    // const querySwapId = `query PriceHistory($token: bigint!) {
-    //     hic_et_nunc_token_by_pk(id: $token) {
-    //         swaps {
-    //           id
-    //         }
-    //       }
-    //     }`
-
-    const querySwapId = `query PriceHistory($token: bigint!, $holder_id: String!) {
+    const querySwapIdPrice = `query PriceHistory($token: bigint!, $holder_id: String_comparison_exp!) {
         hic_et_nunc_token_by_pk(id: $token) {
-            token_holders(where: {holder_id: {_eq: $holder_id}}) {
-              token {
-                swaps {
-                  id
+            token_holders(where: {holder_id: $holder_id}) {
+                token {
+                    swaps {
+                        id
+                        price
+                    }
                 }
-              }
             }
-          }
-        }`
+        }
+    }`
 
     const fetchGraphQL = async (operationsDoc: string, operationName: string, variables: {}) => {
         const result = await api.post('/v1/graphql',{
@@ -64,17 +57,17 @@ module.exports = (toolbox: GluegunToolbox) => {
         const response = await fetchGraphQL(queryCreator, 'PriceHistory', variables)
             .then((res) => {if (res.ok) { return res.data}})
             .catch(e => print.error(e))
-        return response
+        return response['data']['hic_et_nunc_token_by_pk']['creator']
     }
 
-    const fetchLatestSwapId = async (objkt: number) => {
-        const variables = {'token':objkt.toString(), 'holder_id': (await fetchObjktCreator(objkt))['data']['hic_et_nunc_token_by_pk']['creator']['address']}
-        const response = await fetchGraphQL(querySwapId, 'PriceHistory', variables)
+    const fetchLatestSwapFromCreator = async (objkt: number) => {
+        const variables = {'token':objkt.toString(), 'holder_id': {_eq: (await fetchObjktCreator(objkt))['address']}}
+        const response = await fetchGraphQL(querySwapIdPrice, 'PriceHistory', variables)
             .then((res) => {if (res.ok) { return res.data}})
             .catch(e => print.error(e))
-        const latestSwaps = response['data']['hic_et_nunc_token_by_pk'].token_holders[0]['token']['swaps']
-        return latestSwaps[latestSwaps.length - 1].id
+        const latestSwaps = response['data']['hic_et_nunc_token_by_pk']['token_holders'][0]['token']['swaps']
+        return latestSwaps[latestSwaps.length - 1]
     }
 
-    toolbox.hicdex = { fetchObjktRoyalties, fetchObjktCreator, fetchLatestSwapId }
+    toolbox.hicdex = { fetchObjktRoyalties, fetchObjktCreator, fetchLatestSwapFromCreator }
 }

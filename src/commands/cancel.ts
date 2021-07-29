@@ -34,13 +34,13 @@ module.exports = {
         spinner.stop()
         spinner.succeed('NFT contract loaded')
 
-        const cancelBatch = await Promise.all(cancelRecords.map(async (record) => ({
-                    kind: OpKind.TRANSACTION,
-            // tslint:disable-next-line:radix
-                    ...nftContract.methods.cancel_swap(await hicdex.fetchLatestSwapId(parseInt(record))).toTransferParams({ amount: 0, mutez: true, storageLimit: 250 })
-                  }))) as WalletParamsWithKind[]
-
         try {
+            const cancelBatch = await Promise.all(cancelRecords.map(async (record) => ({
+                kind: OpKind.TRANSACTION,
+                // tslint:disable-next-line:radix
+                    ...nftContract.methods.cancel_swap(await hicdex.fetchLatestSwapId(parseInt(record))).toTransferParams({ amount: 0, mutez: true, storageLimit: 250 })
+            }))) as WalletParamsWithKind[]
+
             print.info('Cancelling...')
             const cancelOperation = await Tezos.wallet.batch(cancelBatch).send()
 

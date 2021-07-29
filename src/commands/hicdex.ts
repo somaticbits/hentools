@@ -18,8 +18,12 @@ module.exports = {
             print.info(`Creator of OBJKT #${options.c}: ${creator['address']} - ${creator['name']}`)
         }
         if (options.s) {
-            const latestSwapId = await hicdex.fetchLatestSwapId(options.s)
+            const latestSwapId = (await hicdex.fetchLatestSwapFromCreator(options.s))['id']
             print.info(`Latest swap ID of OBJKT #${options.s}: ${latestSwapId}`)
+        }
+        if (options.p) {
+            const latestPrice = (await hicdex.fetchLatestSwapFromCreator(options.p))['price'] / 1e6
+            print.info(`Latest price of OBJKT #${options.p}: ${latestPrice}tz`)
         }
     }
 }
