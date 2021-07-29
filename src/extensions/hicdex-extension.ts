@@ -21,10 +21,22 @@ module.exports = (toolbox: GluegunToolbox) => {
         }
     }`
 
-    const querySwapId = `query PriceHistory($token: bigint!) {
+    // const querySwapId = `query PriceHistory($token: bigint!) {
+    //     hic_et_nunc_token_by_pk(id: $token) {
+    //         swaps {
+    //           id
+    //         }
+    //       }
+    //     }`
+
+    const querySwapId = `query PriceHistory($token: bigint!, $holder_id: String!) {
         hic_et_nunc_token_by_pk(id: $token) {
-            swaps {
-              id
+            token_holders(where: {holder_id: {_eq: $holder_id}}) {
+              token {
+                swaps {
+                  id
+                }
+              }
             }
           }
         }`
@@ -52,16 +64,17 @@ module.exports = (toolbox: GluegunToolbox) => {
         const response = await fetchGraphQL(queryCreator, 'PriceHistory', variables)
             .then((res) => {if (res.ok) { return res.data}})
             .catch(e => print.error(e))
-        return response['data']['hic_et_nunc_token_by_pk']['creator']
+        return response
     }
 
-    const fetchObjktSwapId = async (objkt: number) => {
-        const variables = {'token':objkt.toString()}
+    const fetchLatestSwapId = async (objkt: number) => {
+        const variables = {'token':objkt.toString(), 'holder_id': (await fetchObjktCreator(objkt))['data']['hic_et_nunc_token_by_pk']['creator']['address']}
         const response = await fetchGraphQL(querySwapId, 'PriceHistory', variables)
             .then((res) => {if (res.ok) { return res.data}})
             .catch(e => print.error(e))
-        return response['data']['hic_et_nunc_token_by_pk']['swaps']
+        const latestSwaps = response['data']['hic_et_nunc_token_by_pk'].token_holders[0]['token']['swaps']
+        return latestSwaps[latestSwaps.length - 1].id
     }
 
-    toolbox.hicdex = { fetchObjktRoyalties, fetchObjktCreator, fetchObjktSwapId }
+    toolbox.hicdex = { fetchObjktRoyalties, fetchObjktCreator, fetchLatestSwapId }
 }

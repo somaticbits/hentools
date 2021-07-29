@@ -7,7 +7,7 @@ module.exports = {
     alias: ['c'],
     description: 'Cancel swaps',
     run: async (toolbox: GluegunToolbox)=> {
-        const { parameters, print, config, tz } = toolbox
+        const { parameters, print, config, tz, hicdex } = toolbox
 
         let cancelRecords = parameters.array
 
@@ -34,11 +34,11 @@ module.exports = {
         spinner.stop()
         spinner.succeed('NFT contract loaded')
 
-        const cancelBatch = cancelRecords.map((record) => ({
+        const cancelBatch = await Promise.all(cancelRecords.map(async (record) => ({
                     kind: OpKind.TRANSACTION,
             // tslint:disable-next-line:radix
-            ...nftContract.methods.cancel_swap(parseInt(record)).toTransferParams({ amount: 0, mutez: true, storageLimit: 250 })
-                  })) as WalletParamsWithKind[]
+                    ...nftContract.methods.cancel_swap(await hicdex.fetchLatestSwapId(parseInt(record))).toTransferParams({ amount: 0, mutez: true, storageLimit: 250 })
+                  }))) as WalletParamsWithKind[]
 
         try {
             print.info('Cancelling...')
