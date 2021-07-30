@@ -12,22 +12,22 @@ jobs:
           build: npx caxa -i . -o "hentools--win--${{ github.sha }}.exe" "{{caxa}}/node_modules/.bin/node" "{{caxa}}/bin/run-hentools.js"
           artifact: hentools--win--${{ github.sha }}.exe
       runs-on: ${{ matrix.os }}-latest
-      steps:
-        - uses: actions/checkout@v2
-        - uses: actions/setup-node@v2
-          with:
-            node-version: '16.x'
-            cache: 'yarn'
-        - run: yarn install
-        - run: yarn format
-        - run: yarn lint
-        - run: yarn clean-build
-        - run: yarn compile
-        - run: ${{ matrix.build }}
-        - uses: actions/upload-artifact@v2
-          with:
-            name: ${{ matrix.artifact }}
-            path: ${{ matrix.artifact }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '16.x'
+          cache: 'yarn'
+      - run: yarn install
+      - run: yarn format
+      - run: yarn lint
+      - run: yarn clean-build
+      - run: yarn compile
+      - run: ${{ matrix.build }}
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.artifact }}
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')
