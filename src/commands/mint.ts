@@ -10,7 +10,7 @@ import { ObjktMetadata } from '../types'
 module.exports = {
   name: 'mint',
   alias: ['m'],
-  description: 'Mint artwork(s), -s to swap directly after.',
+  description: 'Mint artwork(s), -s to follow-up swap.',
   run: async (toolbox: GluegunToolbox) => {
     const {
       parameters,
