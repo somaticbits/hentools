@@ -8,6 +8,7 @@
     "hentools": "bin/hentools"
   },
   "scripts": {
+    "postinstall": "patch-package",
     "format": "prettier --write **/*.{js,ts,tsx,json}",
     "lint": "eslint --fix .",
     "clean-build": "rimraf ./build",
@@ -38,7 +39,9 @@
     "csv-parse": "^4.16.0",
     "gluegun": "latest",
     "ipfs-http-client": "^50.1.2",
-    "mime-types": "^2.1.31"
+    "mime-types": "^2.1.31",
+    "patch-package": "^6.4.7",
+    "postinstall-postinstall": "^2.1.0"
   },
   "devDependencies": {
     "@types/jest": "^24.0.18",

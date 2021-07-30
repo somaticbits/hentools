@@ -1,0 +1,14 @@
+diff --git a/node_modules/uint8arrays/dist/to-string.d.ts b/node_modules/uint8arrays/dist/to-string.d.ts
+index a5b56ac..09a451f 100644
+--- a/node_modules/uint8arrays/dist/to-string.d.ts
++++ b/node_modules/uint8arrays/dist/to-string.d.ts
+@@ -17,6 +17,6 @@ declare function toString(array: Uint8Array, encoding?: bases.SupportedEncodings
+ declare namespace toString {
+     export { SupportedEncodings };
+ }
+-import bases = require("./util/bases");
+-type SupportedEncodings = import('./util/bases').SupportedEncodings;
++import bases = require("../util/bases");
++type SupportedEncodings = import('../util/bases').SupportedEncodings;
+ //# sourceMappingURL=to-string.d.ts.map
+\ No newline at end of file
