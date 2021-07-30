@@ -20,7 +20,6 @@ jobs:
           cache: 'yarn'
       - run: yarn install
       - run: yarn format
-      - run: yarn lint
       - run: yarn clean-build
       - run: yarn compile
       - run: ${{ matrix.build }}
