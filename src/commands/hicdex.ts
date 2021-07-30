@@ -4,7 +4,7 @@ module.exports = {
   name: 'hicdex',
   alias: ['hd'],
   description:
-    'Various hicdex functions, -r for fetching objkt royalties, -c for fetching objkt creator, -s for fetching latest swap id',
+    'hicdex functions, -r for fetching objkt royalties, -c for fetching objkt creator, -s for fetching latest swap id',
   run: async (toolbox: GluegunToolbox) => {
     const { parameters, hicdex, print } = toolbox
 
