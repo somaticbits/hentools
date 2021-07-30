@@ -5,7 +5,7 @@ import { InMemorySigner } from '@taquito/signer'
 module.exports = {
   name: 'cancel',
   alias: ['c'],
-  description: 'Cancel swaps',
+  description: 'Cancel swaps, add OBJKT id',
   run: async (toolbox: GluegunToolbox) => {
     const { parameters, print, config, tz, hicdex } = toolbox
 
