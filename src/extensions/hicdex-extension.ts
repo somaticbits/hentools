@@ -36,7 +36,7 @@ module.exports = (toolbox: GluegunToolbox) => {
   const fetchGraphQL = async (
     operationsDoc: string,
     operationName: string,
-    variables: {}
+    variables: Record<string, unknown>
   ) => {
     const result = await api.post('/v1/graphql', {
       query: operationsDoc,
