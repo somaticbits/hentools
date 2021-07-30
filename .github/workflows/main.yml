@@ -36,7 +36,7 @@ jobs:
       - uses: actions/download-artifact@v2
         with:
           name: hentools--win--${{ github.sha }}.exe
-      - run: echo "::set-output name=tag::${{GITHUB_REF#refs/tags/}"
+      - run: echo "::set-output name=tag::${{GITHUB_REF#refs/tags/}}"
         id: tag
       - uses: actions/create-release@v1
         id: create-release
