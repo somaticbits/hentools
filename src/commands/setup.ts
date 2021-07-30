@@ -5,32 +5,32 @@ Once you have your key, enter it below.
 SECRET KEY>`
 
 module.exports = {
-    name: 'setup',
-    alias: ['s'],
-    description: 'Setup your wallet, add your secret key. -r to reset key',
-    run: async (toolbox: GluegunToolbox) => {
-        const { prompt, tz, print, parameters } = toolbox
+  name: 'setup',
+  alias: ['s'],
+  description: 'Setup your wallet, add your secret key. -r to reset key',
+  run: async (toolbox: GluegunToolbox) => {
+    const { prompt, tz, print, parameters } = toolbox
 
-        const options = parameters.options
+    const options = parameters.options
 
-        if ((await tz.getSecretKey()) === false) {
-            const result = await prompt.ask({
-                type: 'input',
-                name: 'secretkey',
-                message: SECRET_KEY_MESSAGE,
-            })
+    if ((await tz.getSecretKey()) === false) {
+      const result = await prompt.ask({
+        type: 'input',
+        name: 'secretkey',
+        message: SECRET_KEY_MESSAGE
+      })
 
-            if (result && result.secretkey) {
-                await tz.saveSecretKey(result.secretkey)
-            } else {
-                print.info('Secret key set.')
-                return
-            }
-        }
-
-        if (options.r) {
-            tz.resetKey()
-            print.info('Secret key has been reset.')
-        }
+      if (result && result.secretkey) {
+        await tz.saveSecretKey(result.secretkey)
+      } else {
+        print.info('Secret key set.')
+        return
+      }
     }
+
+    if (options.r) {
+      tz.resetKey()
+      print.info('Secret key has been reset.')
+    }
+  }
 }
