@@ -5,7 +5,7 @@ import { InMemorySigner } from '@taquito/signer'
 module.exports = {
   name: 'buy',
   alias: ['b'],
-  description: 'Buy one or multiple OBJKTs',
+  description: 'Buy one or multiple OBJKTs by adding OBJKT id',
   run: async (toolbox: GluegunToolbox) => {
     const { parameters, print, config, tz, hicdex, prompt } = toolbox
 
