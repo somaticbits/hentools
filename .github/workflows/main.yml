@@ -13,8 +13,8 @@ jobs:
             artifact: hentools--win--${{ github.sha }}.exe
           - os: macos
             build: |
-              npx caxa -i . -o "hentools.sh" "{{caxa}}/node_modules/.bin/node" "{{caxa}}/bin/run-hentools.js"
-            artifact: hentools.sh
+              npx caxa -i . -o "hentools--macos--${{ github.sha }}.sh" "{{caxa}}/node_modules/.bin/node" "{{caxa}}/bin/run-hentools.js"
+            artifact: hentools--macos--${{ github.sha }}.sh
     runs-on: ${{ matrix.os }}-latest
     steps:
       - uses: actions/checkout@v2
@@ -37,20 +37,31 @@ jobs:
       - uses: actions/download-artifact@v2
         with:
           name: hentools--win--${{ github.sha }}.exe
-      - run: echo "::set-output name=tag::${GITHUB_REF#refs/tags/}"
-        id: tag
+      - uses: actions/download-artifact@v2
+        with:
+          name: hentools--macos--${{ github.sha }}.sh
+      - uses: Saionaro/extract-package-version@v1.0.6
+        id: extract_version
       - uses: actions/create-release@v1
         id: create-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: $${{ steps.tag.outputs.tag }}
-          release_name: Release ${{ steps.tag.outputs.tag }}
+          tag_name: $${{ steps.extract_version.outputs.version }}
+          release_name: Release ${{ steps.extract_version.outputs.version }}
       - uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create-release.outputs.upload_url }}
           asset_path: hentools--win--${{ github.sha }}.exe
-          asset_name: hentools--win--${{ steps.tag.outputs.tag }}.exe
+          asset_name: hentools--win--${{ steps.extract_version.outputs.version }}.exe
           asset_content_type: application/vnd.microsoft.portable-executable
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          asset_path: hentools--macos--${{ github.sha }}.app.tgz
+          asset_name: hentools--macos--${{ steps.extract_version.outputs.version }}.sh
+          asset_content_type: application/x-sh
