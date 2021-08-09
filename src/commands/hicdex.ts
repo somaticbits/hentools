@@ -31,5 +31,12 @@ module.exports = {
         (await hicdex.fetchLatestSwapFromCreator(options.p))['price'] / 1e6
       print.info(`Latest price of OBJKT #${options.p}: ${latestPrice}tz`)
     }
+    if (options.a) {
+      const objktAmount = await hicdex.fetchObjktAmount(
+        options.a,
+        'tz1gi68wGST7UtzkNpnnc354mpqCcVNQVcSw'
+      )
+      print.info(`You own ${objktAmount} edition(s) of OBJKT #${options.a}`)
+    }
   }
 }

@@ -5,13 +5,13 @@ module.exports = (toolbox: GluegunToolbox) => {
 
   const api = http.create({ baseURL: 'https://api.hicdex.com' })
 
-  const queryRoyalties = `query PriceHistory($token: bigint!) {
+  const queryRoyalties = `query Royalties($token: bigint!) {
         hic_et_nunc_token_by_pk(id: $token) {
             royalties
         }
     }`
 
-  const queryCreator = `query PriceHistory($token: bigint!) {
+  const queryCreator = `query Creator($token: bigint!) {
         hic_et_nunc_token_by_pk(id: $token) {
             creator {
                 address
@@ -20,7 +20,7 @@ module.exports = (toolbox: GluegunToolbox) => {
         }
     }`
 
-  const querySwapIdPrice = `query PriceHistory($token: bigint!, $holder_id: String_comparison_exp!) {
+  const querySwapIdPrice = `query SwapIdPrice($token: bigint!, $holder_id: String_comparison_exp!) {
         hic_et_nunc_token_by_pk(id: $token) {
             token_holders(where: {holder_id: $holder_id}) {
                 token {
@@ -32,6 +32,16 @@ module.exports = (toolbox: GluegunToolbox) => {
             }
         }
     }`
+
+  const queryObjktAmount = `query ObjktAmount($token: bigint!, $holder_id: String_comparison_exp!) {
+        hic_et_nunc_token_by_pk(id: $token) {
+          id
+          token_holders(where: {holder_id: $holder_id}) {
+            quantity
+          }
+        }
+      }
+      `
 
   const fetchGraphQL = async (
     operationsDoc: string,
@@ -48,11 +58,7 @@ module.exports = (toolbox: GluegunToolbox) => {
 
   const fetchObjktRoyalties = async (objkt: number) => {
     const variables = { token: objkt.toString() }
-    const response = await fetchGraphQL(
-      queryRoyalties,
-      'PriceHistory',
-      variables
-    )
+    const response = await fetchGraphQL(queryRoyalties, 'Royalties', variables)
       .then(res => {
         if (res.ok) {
           return res.data
@@ -64,7 +70,7 @@ module.exports = (toolbox: GluegunToolbox) => {
 
   const fetchObjktCreator = async (objkt: number) => {
     const variables = { token: objkt.toString() }
-    const response = await fetchGraphQL(queryCreator, 'PriceHistory', variables)
+    const response = await fetchGraphQL(queryCreator, 'Creator', variables)
       .then(res => {
         if (res.ok) {
           return res.data
@@ -81,7 +87,7 @@ module.exports = (toolbox: GluegunToolbox) => {
     }
     const response = await fetchGraphQL(
       querySwapIdPrice,
-      'PriceHistory',
+      'SwapIdPrice',
       variables
     )
       .then(res => {
@@ -97,9 +103,31 @@ module.exports = (toolbox: GluegunToolbox) => {
     return latestSwaps[latestSwaps.length - 1]
   }
 
+  const fetchObjktAmount = async (objkt: number, creator: string) => {
+    const variables = {
+      token: objkt.toString(),
+      holder_id: { _eq: creator }
+    }
+    const response = await fetchGraphQL(
+      queryObjktAmount,
+      'ObjktAmount',
+      variables
+    )
+      .then(res => {
+        if (res.ok) {
+          return res.data
+        }
+      })
+      .catch(e => print.error(e))
+    return response['data']['hic_et_nunc_token_by_pk']['token_holders'][0][
+      'quantity'
+    ]
+  }
+
   toolbox.hicdex = {
     fetchObjktRoyalties,
     fetchObjktCreator,
-    fetchLatestSwapFromCreator
+    fetchLatestSwapFromCreator,
+    fetchObjktAmount
   }
 }
