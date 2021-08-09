@@ -6,11 +6,15 @@ jobs:
   insiders-build:
     strategy:
       matrix:
-        os: [windows]
+        os: [windows, macos]
         include:
           - os: windows
             build: npx caxa -i . -o "hentools--win--${{ github.sha }}.exe" "{{caxa}}/node_modules/.bin/node" "{{caxa}}/bin/run-hentools.js"
             artifact: hentools--win--${{ github.sha }}.exe
+          - os: macos
+            build: |
+              npx caxa -i . -o "hentools.sh" "{{caxa}}/node_modules/.bin/node" "{{caxa}}/bin/run-hentools.js"
+            artifact: hentools.sh
     runs-on: ${{ matrix.os }}-latest
     steps:
       - uses: actions/checkout@v2
@@ -19,9 +23,7 @@ jobs:
           node-version: '16.x'
           cache: 'yarn'
       - run: yarn install
-      - run: yarn format
-      - run: yarn clean-build
-      - run: yarn compile
+      - run: yarn build
       - run: ${{ matrix.build }}
       - uses: actions/upload-artifact@v2
         with:
