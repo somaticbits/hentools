@@ -6,7 +6,7 @@ module.exports = {
   description:
     'hicdex functions, -r for fetching objkt royalties, -c for fetching objkt creator, -s for fetching latest swap id from creator',
   run: async (toolbox: GluegunToolbox) => {
-    const { parameters, hicdex, print } = toolbox
+    const { parameters, hicdex, print, tz } = toolbox
 
     const options = parameters.options
 
@@ -32,9 +32,10 @@ module.exports = {
       print.info(`Latest price of OBJKT #${options.p}: ${latestPrice}tz`)
     }
     if (options.a) {
+      const creator = (await tz.getSecretKey())['tzAddress']
       const objktAmount = await hicdex.fetchObjktAmount(
         options.a,
-        'tz1gi68wGST7UtzkNpnnc354mpqCcVNQVcSw'
+        creator
       )
       print.info(`You own ${objktAmount} edition(s) of OBJKT #${options.a}`)
     }
