@@ -38,14 +38,12 @@ module.exports = {
       const buyingBatch = (await Promise.all(
         buyRecords.map(async record => ({
           kind: OpKind.TRANSACTION,
-          // tslint:disable-next-line:radix
           ...nftContract.methods
             .collect(
               (await hicdex.fetchLatestSwapFromCreator(parseInt(record, 10)))[
                 'id'
               ]
             )
-            // tslint:disable-next-line:radix
             .toTransferParams({
               amount: (
                 await hicdex.fetchLatestSwapFromCreator(parseInt(record, 10))
@@ -57,7 +55,6 @@ module.exports = {
       )) as Array<WalletParamsWithKind>
 
       const objktsPrices = buyRecords.map(async record => ({
-        // tslint:disable-next-line:radix
         objkt: record,
         price:
           (await hicdex.fetchLatestSwapFromCreator(parseInt(record, 10)))[
