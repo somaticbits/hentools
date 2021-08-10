@@ -1,7 +1,7 @@
 module.exports = {
   name: 'hentools',
   defaults: {
-    rpcURL: 'https://mainnet-tezos.giganode.io',
+    rpcURL: 'https://rpc.tzbeta.net/',
 
     // IPFS
     infuraURL: 'https://ipfs.infura.io:5001',

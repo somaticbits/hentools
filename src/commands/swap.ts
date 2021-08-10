@@ -26,7 +26,7 @@ module.exports = {
       const result = await prompt.ask({
         type: 'input',
         name: 'folder',
-        message: 'Which folder?'
+        message: 'In which folder is the swap csv located?'
       })
       if (result && result.name) {
         folder = result.name

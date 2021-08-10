@@ -11,6 +11,7 @@ async function run(argv) {
     .plugins('./node_modules', { matching: 'hentools-*', hidden: true })
     .help() // provides default for help, h, --help, -h
     .version() // provides default for version, v, --version, -v
+    .exclude(['meta', 'semver', 'template', 'patching', 'package-manger'])
     .defaultCommand()
     .create()
   // enable the following method if you'd like to skip loading one of these core extensions
@@ -24,3 +25,6 @@ async function run(argv) {
 }
 
 module.exports = { run }
+
+// TODO: add formula-as-pricing
+// TODO: add OBJKT number estimation + exact number minting
