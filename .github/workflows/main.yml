@@ -40,24 +40,23 @@ jobs:
       - uses: actions/download-artifact@v2
         with:
           name: hentools--macos--${{ github.sha }}.sh
-      - uses: Saionaro/extract-package-version@v1.0.6
-        with:
-          path: "/Users/runner/work/hentools/hentools"
-        id: extract_version
+      - name: get-npm-version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@master
       - uses: actions/create-release@v1
         id: create-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: $${{ steps.extract_version.outputs.version }}
-          release_name: Release ${{ steps.extract_version.outputs.version }}
+          tag_name: ${{ steps.package-version.outputs.current-version}}
+          release_name: Release ${{ steps.package-version.outputs.current-version}}
       - uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create-release.outputs.upload_url }}
           asset_path: hentools--win--${{ github.sha }}.exe
-          asset_name: hentools--win--${{ steps.extract_version.outputs.version }}.exe
+          asset_name: hentools--win--${{ steps.package-version.outputs.current-version}}.exe
           asset_content_type: application/vnd.microsoft.portable-executable
       - uses: actions/upload-release-asset@v1
         env:
@@ -65,5 +64,5 @@ jobs:
         with:
           upload_url: ${{ steps.create-release.outputs.upload_url }}
           asset_path: hentools--macos--${{ github.sha }}.app.tgz
-          asset_name: hentools--macos--${{ steps.extract_version.outputs.version }}.sh
+          asset_name: hentools--macos--${{ steps.package-version.outputs.current-version}}.sh
           asset_content_type: application/x-sh
