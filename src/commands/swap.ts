@@ -69,6 +69,7 @@ module.exports = {
 
     const swaps = filesystem.list(folder).filter(x => x.includes('swaps'))
 
+    // TODO: break loop if first swap fails
     for (const swap of swaps) {
       const inputFile = path.join(folder, swap)
       print.info(`Reading input: ${swap}`)
@@ -133,6 +134,7 @@ module.exports = {
         print.info('Swapping transaction confirmed!')
       } catch (e) {
         print.error(e)
+        return null
       }
     }
   }
