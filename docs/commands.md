@@ -102,13 +102,15 @@ Pull various informations from ``hicdex.com``. Used by the tools internally.
 ``-s``  get the latest Swap ID from the OBJKT from the wallet registered with hentools  
 ``-r``  get the royalties from the OBJKT
 
-**EXAMPLE**
+**EXAMPLE**  
+Get the creator of OBJKT #715554  
+``hentools hicdex -c 715554``
 
+Get the latest Swap ID from OBJKT #715554   
+``hentools hicdex -s 715554``
 
-
-// TODO: burn
-
-// TODO: csv templates
+Get the royalties from OBJKT #715554  
+``hentools hicdex -r 715554``
 
 
 
