@@ -17,13 +17,8 @@
 <h3 align="center">hentools</h3>
 
   <p align="center">
-    project_description
+    This repository contains the CLI tool used for operating directly on the smart contracts of the hicetnunc marketplace.
     <br />
-    <a href="https://github.com/somaticbits/hentools"><strong>Explore the docs »</strong></a>
-    <br />
-    <br />
-    <a href="https://github.com/somaticbits/hentools">View Demo</a>
-    ·
     <a href="https://github.com/somaticbits/hentools/issues">Report Bug</a>
     ·
     <a href="https://github.com/somaticbits/hentools/issues">Request Feature</a>
@@ -63,9 +58,9 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
+The CLI tool is part of a bigger project of generative art called serialCore. It can be used to call the mint, swap, cancel and burn operations using the smart contracts directly instead of using the marketplace. It is not specific to the serialCore project, and can be used on any NFTs. Only conditions is that these tokens need to be either static images or videos.
 
-Here's a blank template to get started: To avoid retyping too much info. Do a search and replace with your text editor for the following: `somaticbits`, `hentools`, `somaticbits`, `linkedin_username`, `somaticbits`, `david`, `project_title`, `project_description`
+The main framework used to create the CLI is [Gluegun](https://github.com/infinitered/gluegun). It allows the creation of a command line tool based on Node.js (Typescript / Javascript).
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -73,14 +68,8 @@ Here's a blank template to get started: To avoid retyping too much info. Do a se
 
 ### Built With
 
-* [Next.js](https://nextjs.org/)
-* [React.js](https://reactjs.org/)
-* [Vue.js](https://vuejs.org/)
-* [Angular](https://angular.io/)
-* [Svelte](https://svelte.dev/)
-* [Laravel](https://laravel.com)
-* [Bootstrap](https://getbootstrap.com)
-* [JQuery](https://jquery.com)
+* [Taquito](https://tezostaquito.io/)
+* [Gluegun](https://github.com/infinitered/gluegun)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -89,16 +78,11 @@ Here's a blank template to get started: To avoid retyping too much info. Do a se
 <!-- GETTING STARTED -->
 ## Getting Started
 
-This is an example of how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
+To get a local copy up and running follow these simple steps.
 
 ### Prerequisites
 
-This is an example of how to list things you need to use the software and how to install them.
-* npm
-  ```sh
-  npm install npm@latest -g
-  ```
+[Node.js 12.0+](https://nodejs.org/en/) and a [Tezos Wallet](https://templewallet.com/) is needed. Some art in the form of static images and/or videos would also be useful.
 
 ### Installation
 
