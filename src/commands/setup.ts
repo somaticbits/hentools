@@ -12,21 +12,25 @@ module.exports = {
     const { prompt, tz, print, parameters } = toolbox
 
     const options = parameters.options
+    try {
+      if ((await tz.getSecretKey()) === false) {
+        const result = await prompt.ask({
+          type: 'input',
+          name: 'secretkey',
+          message: SECRET_KEY_MESSAGE
+        })
 
-    if ((await tz.getSecretKey()) === false) {
-      const result = await prompt.ask({
-        type: 'input',
-        name: 'secretkey',
-        message: SECRET_KEY_MESSAGE
-      })
-
-      if (result && result.secretkey) {
-        await tz.saveSecretKey(result.secretkey)
-      } else {
-        print.info('Secret key set.')
-        return
+        if (result && result.secretkey) {
+          await tz.saveSecretKey(result.secretkey)
+        } else {
+          print.info('Secret key set.')
+          return
+        }
       }
+    } catch (error) {
+      print.error(error)
     }
+
 
     if (options.r) {
       tz.resetKey()

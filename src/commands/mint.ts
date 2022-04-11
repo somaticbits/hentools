@@ -4,7 +4,12 @@ import * as mime from 'mime-types'
 
 import parse = require('csv-parse/lib/sync')
 import { InMemorySigner } from '@taquito/signer'
-import {TezosToolkit, OpKind, WalletParamsWithKind, WalletOperation} from '@taquito/taquito'
+import {
+  TezosToolkit,
+  OpKind,
+  WalletParamsWithKind,
+  WalletOperation
+} from '@taquito/taquito'
 import { ObjktMetadata } from '../types'
 
 module.exports = {
@@ -130,20 +135,26 @@ module.exports = {
     })) as Array<WalletParamsWithKind>
 
     try {
-
       let mintOperation: WalletOperation
 
       if (options.t) {
-
-        let currentObjktId, lastGasFee = 0
+        let currentObjktId,
+          lastGasFee = 0
         const targetId = options.t
-        const blockSub = Tezos.stream.subscribeOperation({destination: `${config.hentools.hicetnuncMinter}`});
+        const blockSub = Tezos.stream.subscribeOperation({
+          destination: `${config.hentools.hicetnuncMinter}`
+        })
 
         blockSub.on('data', async data => {
           if (data['parameters']['entrypoint'] === 'mint_OBJKT') {
-            currentObjktId = data['metadata']['operation_result']['big_map_diff'][0]['key']['int']
+            currentObjktId =
+              data['metadata']['operation_result']['big_map_diff'][0]['key'][
+                'int'
+              ]
             lastGasFee = data['gas_limit']
-            console.log(`This is the current OBJKT: #${currentObjktId}, targetId: #${targetId}`)
+            console.log(
+              `This is the current OBJKT: #${currentObjktId}, targetId: #${targetId}`
+            )
             if (currentObjktId == targetId - 1) {
               blockSub.close()
               print.info(`Minting #${targetId}...`)
@@ -151,19 +162,24 @@ module.exports = {
               const mintBatch = mintRecords.map(record => ({
                 kind: OpKind.TRANSACTION,
                 ...minterContract.methods
-                    .mint_OBJKT(
-                        creator,
-                        record.amount,
-                        Buffer.from(record.metaUri).toString('hex'),
-                        record.royalties * 10
-                    )
-                    .toTransferParams({ fee: lastGasFee * 5, amount: 0, mutez: true, storageLimit: 1000 })
+                  .mint_OBJKT(
+                    creator,
+                    record.amount,
+                    Buffer.from(record.metaUri).toString('hex'),
+                    record.royalties * 10
+                  )
+                  .toTransferParams({
+                    fee: lastGasFee * 5,
+                    amount: 0,
+                    mutez: true,
+                    storageLimit: 1000
+                  })
               })) as Array<WalletParamsWithKind>
 
               mintOperation = await Tezos.wallet.batch(mintBatch).send()
 
               print.info(
-                  `Waiting for ${config.hentools.txConfirmations} confirmations, see https://tzstats.com/${mintOperation.opHash}`
+                `Waiting for ${config.hentools.txConfirmations} confirmations, see https://tzstats.com/${mintOperation.opHash}`
               )
 
               await mintOperation.confirmation(config.hentools.txConfirmations)
@@ -176,7 +192,7 @@ module.exports = {
         mintOperation = await Tezos.wallet.batch(mintBatch).send()
 
         print.info(
-            `Waiting for ${config.hentools.txConfirmations} confirmations, see https://tzstats.com/${mintOperation.opHash}`
+          `Waiting for ${config.hentools.txConfirmations} confirmations, see https://tzstats.com/${mintOperation.opHash}`
         )
 
         await mintOperation.confirmation(config.hentools.txConfirmations)

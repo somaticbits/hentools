@@ -21,22 +21,26 @@ module.exports = {
       )
     }
     if (options.s) {
-      const latestSwapId = (await hicdex.fetchLatestSwapFromCreator(options.s))[
-        'id'
-      ]
-      print.info(`Latest swap ID of OBJKT #${options.s}: ${latestSwapId}`)
+      try {
+        const latestSwapId =
+            (await hicdex.fetchLatestSwapFromCreator(options.s))['id']
+        print.info(`Latest swap ID of OBJKT #${options.s}: ${latestSwapId}`)
+      } catch (e) {
+        print.info(`Latest swap ID of OBJKT #${options.s} does not exist`)
+      }
     }
     if (options.p) {
-      const latestPrice =
-        (await hicdex.fetchLatestSwapFromCreator(options.p))['price'] / 1e6
-      print.info(`Latest price of OBJKT #${options.p}: ${latestPrice}tz`)
+      try {
+        const latestPrice =
+            (await hicdex.fetchLatestSwapFromCreator(options.p))['price'] / 1e6
+        print.info(`Latest price of OBJKT #${options.p}: ${latestPrice}tz`)
+      } catch (e) {
+        print.info(`Latest price of OBJKT #${options.p} does not exist`)
+      }
     }
     if (options.a) {
       const creator = (await tz.getSecretKey())['tzAddress']
-      const objktAmount = await hicdex.fetchObjktAmount(
-        options.a,
-        creator
-      )
+      const objktAmount = await hicdex.fetchObjktAmount(options.a, creator)
       print.info(`You own ${objktAmount} edition(s) of OBJKT #${options.a}`)
     }
   }
