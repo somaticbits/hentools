@@ -86,8 +86,8 @@ To get a local copy up and running follow these simple steps.
 
 ### Installation
 
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
+1. Get a Tezos account (optional if you already have one)
+2. Clone the repo and jump into the cloned folder
    ```sh
    git clone https://github.com/somaticbits/hentools.git
    ```
@@ -95,9 +95,17 @@ To get a local copy up and running follow these simple steps.
    ```sh
    npm install
    ```
-4. Enter your API in `config.js`
-   ```js
-   const API_KEY = 'ENTER YOUR API';
+4. Link the executable
+   ```sh
+   yarn link
+   ```
+4. Enter the secret key of your Tezos account before launching hentools
+   ```sh
+   hentools setup tz1...
+   ```
+5. (optional) In case the secret key is wrong or you want to remove it, you can reset it
+   ```sh
+   hentools setup -r
    ```
 
 <p align="right">(<a href="#top">back to top</a>)</p>
@@ -109,7 +117,7 @@ To get a local copy up and running follow these simple steps.
 
 Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
 
-_For more examples, please refer to the [Documentation](https://example.com)_
+_For more examples, please refer to the [Documentation](https://github.com/somaticbits/hentools/blob/master/docs/commands.md)_
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
