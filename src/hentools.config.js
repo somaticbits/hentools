@@ -22,6 +22,11 @@ module.exports = {
     },
 
     // tezos
-    txConfirmations: 2
+    txConfirmations: 2,
+
+    dataFolder: 'data',
+
+    mintCsvHeaders: ['name','description','tags','mint_qty','royalties','file','swap_qty','xtz'],
+    swapCsvHeaders: ['amount','objkt','xtz']
   }
 }
