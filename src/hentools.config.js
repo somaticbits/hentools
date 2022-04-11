@@ -1,7 +1,7 @@
 module.exports = {
   name: 'hentools',
   defaults: {
-    rpcURL: 'https://rpc.tzbeta.net/',
+    rpcURL: 'https://node.somaticbits.xyz/',
 
     // IPFS
     infuraURL: 'https://ipfs.infura.io:5001',
