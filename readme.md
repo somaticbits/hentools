@@ -17,7 +17,7 @@
 <h3 align="center">hentools</h3>
 
   <p align="center">
-    This repository contains the CLI tool used for operating directly on the smart contracts of the hicetnunc marketplace.
+    This repository contains the CLI tool used for operating directly on the smart contracts of the [hicetnunc](https://www.hicetnunc.xyz) marketplace.
     <br />
     <a href="https://github.com/somaticbits/hentools/issues">Report Bug</a>
     ·
@@ -61,6 +61,8 @@
 The CLI tool is part of a bigger project of generative art called serialCore. It can be used to call the mint, swap, cancel and burn operations using the smart contracts directly instead of using the marketplace. It is not specific to the serialCore project, and can be used on any NFTs. Only conditions is that these tokens need to be either static images or videos.
 
 The main framework used to create the CLI is [Gluegun](https://github.com/infinitered/gluegun). It allows the creation of a command line tool based on Node.js (Typescript / Javascript).
+
+The smart contract interaction is enabled through the usage of [Taquito](https://tezostaquito.io/)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
