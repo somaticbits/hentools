@@ -45,11 +45,7 @@
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
-    <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
   </ol>
 </details>
 
@@ -65,7 +61,6 @@ The main framework used to create the CLI is [Gluegun](https://github.com/infini
 The smart contract interaction is enabled through the usage of [Taquito](https://tezostaquito.io/)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
-
 
 
 ### Built With
