@@ -75,13 +75,13 @@ module.exports = {
       if (result === false) return
 
       print.info('Transferring...')
-      const transfertOperation = await Tezos.wallet.batch(operatorBatch).send()
+      const transferOperation = await Tezos.wallet.batch(operatorBatch).send()
 
       print.info(
-        `Waiting for ${config.hentools.txConfirmations} confirmations, see https://tzstats.com/${transfertOperation.opHash}`
+        `Waiting for ${config.hentools.txConfirmations} confirmations, see https://tzstats.com/${transferOperation.opHash}`
       )
 
-      await transfertOperation.confirmation(config.hentools.txConfirmations)
+      await transferOperation.confirmation(config.hentools.txConfirmations)
       print.info('Transfert transaction confirmed!')
     } catch (e) {
       print.error(e)
