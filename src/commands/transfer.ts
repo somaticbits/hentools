@@ -42,25 +42,25 @@ module.exports = {
 
     try {
       const operatorBatch = (await Promise.all(
-        await transferRecords.map(async record => ({
+        transferRecords.map(async record => ({
           kind: OpKind.TRANSACTION,
           ...operatorContract.methods
-            .transfer([
-              {
-                from_: (await tz.getSecretKey())['tzAddress'],
-                txs: [
-                  {
-                    to_: transferOptions.t,
-                    token_id: record,
-                    amount: await hicdex.fetchObjktAmount(
-                      parseInt(record),
-                      (await tz.getSecretKey())['tzAddress']
-                    )
-                  }
-                ]
-              }
-            ])
-            .toTransferParams({ amount: 0, mutez: true, storageLimit: 100 })
+              .transfer([
+                {
+                  from_: (await tz.getSecretKey())['tzAddress'],
+                  txs: [
+                    {
+                      to_: transferOptions.t,
+                      token_id: record,
+                      amount: await hicdex.fetchObjktAmount(
+                          parseInt(record),
+                          (await tz.getSecretKey())['tzAddress']
+                      )
+                    }
+                  ]
+                }
+              ])
+              .toTransferParams({amount: 0, mutez: true, storageLimit: 100})
         }))
       )) as Array<WalletParamsWithKind>
 
@@ -68,6 +68,7 @@ module.exports = {
       for (const record of transferRecords) {
         message += `#${await record}\n`
       }
+      message += `to ${transferOptions.t}?`
 
       const result = await prompt.confirm(message)
 
