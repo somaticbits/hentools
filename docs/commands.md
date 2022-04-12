@@ -113,4 +113,22 @@ Get the royalties from OBJKT #715554
 ``hentools hicdex -r 715554``
 
 
+## transfer
+**NAME**  
+transfer
 
+**SYNOPSIS**  
+``hicdex transfer [-t] address objktId``
+
+**DESCRIPTION**  
+Used for transferring NFTs to another account
+
+**OPTIONS**  
+``-t``  target address  
+
+**EXAMPLE**  
+Send OBJKT #715554 to burn address  
+``hentools transfer 715554 -t 'tz1burnburnburnburnburnburnburjAYjjX'``
+
+Send OBJKTs #715554 #715555 #715556 to burn address  
+``hentools transfer 715554 715555 715556 -t 'tz1burnburnburnburnburnburnburjAYjjX'``
