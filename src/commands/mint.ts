@@ -131,7 +131,7 @@ module.exports = {
           Buffer.from(record.metaUri).toString('hex'),
           record.royalties * 10
         )
-        .toTransferParams({ amount: 0, mutez: true, storageLimit: 300 })
+        .toTransferParams({ amount: 0, mutez: true, storageLimit: 1000 })
     })) as Array<WalletParamsWithKind>
 
     try {
