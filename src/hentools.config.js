@@ -4,7 +4,7 @@ module.exports = {
     rpcURL: 'https://node.somaticbits.xyz/',
 
     // IPFS
-    infuraURL: 'https://ipfs.infura.io:5001',
+    infuraURL: 'https://ipfs.somaticbits.xyz',
 
     // contracts
     hicetnuncOperator: 'KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton',
