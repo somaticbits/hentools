@@ -15,10 +15,15 @@ module.exports = {
       print.info(`Royalties for OBJKT #${options.r}: ${royalties}%`)
     }
     if (options.c) {
-      const creator = await hicdex.fetchObjktCreator(options.c)
-      print.info(
-        `Creator of OBJKT #${options.c}: ${creator['address']} - ${creator['name']}`
-      )
+      try {
+        const creator = await hicdex.fetchObjktCreator(options.c)
+        print.info(
+            `Creator of OBJKT #${options.c}: ${creator['address']} - ${creator['name']}`
+        )
+      } catch (e) {
+        print.error(e)
+      }
+
     }
     if (options.s) {
       try {
@@ -26,7 +31,7 @@ module.exports = {
             (await hicdex.fetchLatestSwapFromCreator(options.s))['id']
         print.info(`Latest swap ID of OBJKT #${options.s}: ${latestSwapId}`)
       } catch (e) {
-        print.info(`Latest swap ID of OBJKT #${options.s} does not exist`)
+        print.error(`Latest swap ID of OBJKT #${options.s} does not exist`)
       }
     }
     if (options.p) {
@@ -35,7 +40,7 @@ module.exports = {
             (await hicdex.fetchLatestSwapFromCreator(options.p))['price'] / 1e6
         print.info(`Latest price of OBJKT #${options.p}: ${latestPrice}tz`)
       } catch (e) {
-        print.info(`Latest price of OBJKT #${options.p} does not exist`)
+        print.error(`Latest price of OBJKT #${options.p} does not exist`)
       }
     }
     if (options.a) {
