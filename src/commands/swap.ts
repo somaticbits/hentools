@@ -52,7 +52,7 @@ module.exports = {
     const spinner = print.spin('Market contract loading...')
 
     const marketContract = await Tezos.contract.at(
-      config.hentools.hicetnuncNFTv2
+      config.hentools.teiaMarketplace
     )
 
     spinner.stop()
@@ -97,7 +97,7 @@ module.exports = {
               {
                 add_operator: {
                   owner: owner,
-                  operator: config.hentools.hicetnuncNFTv2,
+                  operator: config.hentools.teiaMarketplace,
                   token_id: record.objkt
                 }
               }
@@ -110,17 +110,33 @@ module.exports = {
             kind: OpKind.TRANSACTION,
             ...marketContract.methods
               .swap(
-                (await hicdex.fetchObjktCreator(record.objkt))['address'],
-                record.amount,
+                config.hentools.hicetnuncOperator,
                 record.objkt,
+                record.amount,
+                record.xtz * 1e6,
                 await hicdex.fetchObjktRoyalties(record.objkt),
-                record.xtz * 1e6
+                (await hicdex.fetchObjktCreator(record.objkt))['address']
               )
               .toTransferParams({ amount: 0, mutez: true, storageLimit: 250 })
           }))
         )) as Array<WalletParamsWithKind>
 
-        const swapBatch = operatorBatch.flatMap((a, i) => [a, nftBatch[i]])
+        const revokeBatch = (await records.map(record => ({
+          kind: OpKind.TRANSACTION,
+          ...operatorContract.methods
+            .update_operators([
+              {
+                remove_operator: {
+                  owner: owner,
+                  operator: config.hentools.teiaMarketplace,
+                  token_id: record.objkt
+                }
+              }
+            ])
+            .toTransferParams({ amount: 0, mutez: true, storageLimit: 100 })
+        }))) as Array<WalletParamsWithKind>
+
+        const swapBatch = operatorBatch.flatMap((a, i) => [a, nftBatch[i], revokeBatch[i]])
 
         print.info('Swapping...')
         const swapOperation = await Tezos.wallet.batch(swapBatch).send()

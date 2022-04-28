@@ -204,7 +204,7 @@ module.exports = {
         spinner.start('Market contract loading...')
 
         const marketContract = await Tezos.contract.at(
-          config.hentools.hicetnuncNFTv2
+          config.hentools.teiaMarketplace
         )
 
         spinner.stop()
@@ -246,32 +246,49 @@ module.exports = {
         const operatorBatch = (await swapRecords.map(record => ({
           kind: OpKind.TRANSACTION,
           ...operatorContract.methods
-            .update_operators([
-              {
-                add_operator: {
-                  owner: creator,
-                  operator: config.hentools.hicetnuncNFTv2,
-                  token_id: record.objkt
+              .update_operators([
+                {
+                  add_operator: {
+                    owner: creator,
+                    operator: config.hentools.teiaMarketplace,
+                    token_id: record.objkt
+                  }
                 }
-              }
-            ])
-            .toTransferParams({ amount: 0, mutez: true, storageLimit: 100 })
+              ])
+              .toTransferParams({ amount: 0, mutez: true, storageLimit: 100 })
         }))) as Array<WalletParamsWithKind>
 
         const nftBatch = (await swapRecords.map(record => ({
+              kind: OpKind.TRANSACTION,
+              ...marketContract.methods
+                  .swap(
+                      config.hentools.hicetnuncOperator,
+                      record.objkt,
+                      record.amount,
+                      record.xtz * 1e6,
+                      record.royalties * 10,
+                      creator
+                  )
+                  .toTransferParams({ amount: 0, mutez: true, storageLimit: 250 })
+            }))
+        ) as Array<WalletParamsWithKind>
+
+        const revokeBatch = (await swapRecords.map(record => ({
           kind: OpKind.TRANSACTION,
-          ...marketContract.methods
-            .swap(
-              creator,
-              record.swap_qty,
-              record.objkt,
-              record.royalties * 10,
-              record.xtz * 1e6
-            )
-            .toTransferParams({ amount: 0, mutez: true, storageLimit: 250 })
+          ...operatorContract.methods
+              .update_operators([
+                {
+                  remove_operator: {
+                    owner: creator,
+                    operator: config.hentools.teiaMarketplace,
+                    token_id: record.objkt
+                  }
+                }
+              ])
+              .toTransferParams({ amount: 0, mutez: true, storageLimit: 100 })
         }))) as Array<WalletParamsWithKind>
 
-        const swapBatch = operatorBatch.flatMap((a, i) => [a, nftBatch[i]])
+        const swapBatch = operatorBatch.flatMap((a, i) => [a, nftBatch[i], revokeBatch[i]])
 
         print.info('\nSwapping...')
         const swapOperation = await Tezos.wallet.batch(swapBatch).send()
