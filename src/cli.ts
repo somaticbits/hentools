@@ -13,10 +13,10 @@ async function run(argv) {
     .version() // provides default for version, v, --version, -v
     .exclude(['meta', 'semver', 'template', 'patching', 'package-manager'])
     .defaultCommand({
-      run: async (toolbox) => {
+      run: async toolbox => {
         const { print } = toolbox
         print.info(`Please check the docs before using the CLI.`)
-      },
+      }
     })
     .create()
   // enable the following method if you'd like to skip loading one of these core extensions

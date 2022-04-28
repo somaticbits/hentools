@@ -18,17 +18,17 @@ module.exports = {
       try {
         const creator = await hicdex.fetchObjktCreator(options.c)
         print.info(
-            `Creator of OBJKT #${options.c}: ${creator['address']} - ${creator['name']}`
+          `Creator of OBJKT #${options.c}: ${creator['address']} - ${creator['name']}`
         )
       } catch (e) {
         print.error(e)
       }
-
     }
     if (options.s) {
       try {
-        const latestSwapId =
-            (await hicdex.fetchLatestSwapFromCreator(options.s))['id']
+        const latestSwapId = (
+          await hicdex.fetchLatestSwapFromCreator(options.s)
+        )['id']
         print.info(`Latest swap ID of OBJKT #${options.s}: ${latestSwapId}`)
       } catch (e) {
         print.error(`Latest swap ID of OBJKT #${options.s} does not exist`)
@@ -37,7 +37,7 @@ module.exports = {
     if (options.p) {
       try {
         const latestPrice =
-            (await hicdex.fetchLatestSwapFromCreator(options.p))['price'] / 1e6
+          (await hicdex.fetchLatestSwapFromCreator(options.p))['price'] / 1e6
         print.info(`Latest price of OBJKT #${options.p}: ${latestPrice}tz`)
       } catch (e) {
         print.error(`Latest price of OBJKT #${options.p} does not exist`)

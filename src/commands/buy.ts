@@ -29,7 +29,7 @@ module.exports = {
 
     const spinner = print.spin('NFT contract loading...')
 
-    const nftContract = await Tezos.contract.at(config.hentools.hicetnuncNFTv2)
+    const nftContract = await Tezos.contract.at(config.hentools.teiaMarketplace)
 
     spinner.stop()
     spinner.succeed('NFT contract loaded')

@@ -8,7 +8,7 @@ module.exports = {
 
     // contracts
     hicetnuncOperator: 'KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton',
-    hicetnuncNFTv2: 'KT1HbQepzV1nVGg8QVznG7z4RcHseD5kwqBn',
+    teiaMarketplace: 'KT1PHubm9HtyQEJ4BBpMTVomq6mhbfNZ9z5w',
     hicetnuncMinter: 'KT1Hkg5qeNhfwpKW4fXvq7HGZB9z2EnmCCA9',
 
     // OBJKTs

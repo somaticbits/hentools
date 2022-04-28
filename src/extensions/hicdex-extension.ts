@@ -6,7 +6,6 @@ module.exports = (toolbox: GluegunToolbox) => {
   // const api = http.create({ baseURL: 'https://api.hicdex.com' })
   const api = http.create({ baseURL: 'https://api.teia.rocks/' })
 
-
   const queryRoyalties = `query Royalties($token: bigint!) {
         hic_et_nunc_token_by_pk(id: $token) {
             royalties

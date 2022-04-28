@@ -31,7 +31,6 @@ module.exports = {
       print.error(error)
     }
 
-
     if (options.r) {
       tz.resetKey()
       print.info('Secret key has been reset.')

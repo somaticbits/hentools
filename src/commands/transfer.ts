@@ -45,22 +45,22 @@ module.exports = {
         transferRecords.map(async record => ({
           kind: OpKind.TRANSACTION,
           ...operatorContract.methods
-              .transfer([
-                {
-                  from_: (await tz.getSecretKey())['tzAddress'],
-                  txs: [
-                    {
-                      to_: transferOptions.t,
-                      token_id: record,
-                      amount: await hicdex.fetchObjktAmount(
-                          parseInt(record),
-                          (await tz.getSecretKey())['tzAddress']
-                      )
-                    }
-                  ]
-                }
-              ])
-              .toTransferParams({amount: 0, mutez: true, storageLimit: 100})
+            .transfer([
+              {
+                from_: (await tz.getSecretKey())['tzAddress'],
+                txs: [
+                  {
+                    to_: transferOptions.t,
+                    token_id: record,
+                    amount: await hicdex.fetchObjktAmount(
+                      parseInt(record),
+                      (await tz.getSecretKey())['tzAddress']
+                    )
+                  }
+                ]
+              }
+            ])
+            .toTransferParams({ amount: 0, mutez: true, storageLimit: 100 })
         }))
       )) as Array<WalletParamsWithKind>
 
