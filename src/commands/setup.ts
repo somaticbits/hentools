@@ -32,7 +32,7 @@ module.exports = {
     }
 
     if (options.r) {
-      tz.resetKey()
+      await tz.resetKey()
       print.info('Secret key has been reset.')
     }
   }
