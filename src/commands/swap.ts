@@ -136,7 +136,11 @@ module.exports = {
             .toTransferParams({ amount: 0, mutez: true, storageLimit: 100 })
         }))) as Array<WalletParamsWithKind>
 
-        const swapBatch = operatorBatch.flatMap((a, i) => [a, nftBatch[i], revokeBatch[i]])
+        const swapBatch = operatorBatch.flatMap((a, i) => [
+          a,
+          nftBatch[i],
+          revokeBatch[i]
+        ])
 
         print.info('Swapping...')
         const swapOperation = await Tezos.wallet.batch(swapBatch).send()
