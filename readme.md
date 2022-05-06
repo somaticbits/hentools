@@ -128,10 +128,55 @@ _For more examples, please refer to the [Documentation](https://github.com/somat
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
+## Testing
+
+Prerequisites: [Tezos Client](https://assets.tqtezos.com/docs/setup/1-tezos-client/)
+
+To test the cli, you'll need to create a [Flextesa sandbox](https://tezos.gitlab.io/flextesa/) which allows to deploy the smart contracts developed for the hicetnunc marketplace in a sandbox.
+1. First clone the hicetnunc contracts and open the directory
+```sh
+git clone https://github.com/hicetnunc2000/objkt-swap
+cd objkt-swap
+```
+2. Prepare the Flextesa sandbox Docker container(this has currently a block time of around 3s, which allows for quick tests):
+```sh
+docker run --rm --name objkt-sandbox --detach -p 20000:20000 -e block_time=3 oxheadalpha/flextesa:latest hangzbox start
+```
+3. Configure the client with the sandbox url
+```sh
+tezos-client -E http://localhost:20000 config update
+```
+4. Then check the accounts available on the sandbox
+```sh
+docker run --rm oxheadalpha/flextesa:latest hangzbox info
+```
+5. And import them (replace with proper keys from step before if those are not valid)
+```sh
+tezos-client import secret key alice unencrypted:edsk3QoqBuvdamxouPhin7swCvkQNgq4jP5KZPbwWNnwdZpSpJiEbq
+tezos-client import secret key bob unencrypted:edsk3RFfvaFaxbHx8BMtEW1rKQcPtDML3LXjNqMNLCzC3wLC1bWbAt
+```
+6. Create a storage file for origination of the minting contract (tz address is from the alice account)
+``` sh
+echo '(Pair (Pair "tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb" (Pair 0 {})) (Pair (Pair {Elt "" 0x697066733a2f2f516d504377594b6d45574c4348726e54364b634852456f7a75447165697a696f4865415747766e61614264436f65} {}) (Pair False {})))' >> objkts.storage.tz
+```
+7. Originate the hicetnunc minting contract on the sandbox
+```sh
+tezos-client originate contract main transferring 1 from alice running ./michelson/fa2_objkts.tz --init "`cat ./objkts.storage.tz`" --burn-cap 2 --force
+```
+8. Create a storage file for origination of the swap contract (tz address is from the alice account) by replacing 'KT1TezoooozzSmartPyzzSTATiCzzzwwBFA1' with the minting contract address
+``` sh
+echo '(Pair (Pair 500000 (Pair 25 "tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb")) (Pair {Elt "" 0x697066733a2f2f516d57514e41314138634b5a506f61615a4d757153754c75643747515453786262774358685a373644674571484d} (Pair "KT1TezoooozzSmartPyzzSTATiCzzzwwBFA1" {})))' >> objkt_swap.storage.tz
+```
+9. Originate the hicetnunc swap contract on the sandbox
+```sh
+tezos-client originate contract main transferring 1 from alice running ./michelson/objkt_swap_v2_1.tz --init "`cat ./objkt_swap.storage.tz`" --burn-cap 2 --force
+```
+10. Once the contracts deployed on the sandbox, you need to replace the contracts in the test by the ones from the sandbox
+
 <!-- CONTACT -->
 ## Contact
 
-Your Name - [@somaticbits](https://twitter.com/somaticbits) - david@somaticbits.com
+David Pettersson - [@somaticbits](https://twitter.com/somaticbits) - david@somaticbits.com
 
 Project Link: [https://github.com/somaticbits/hentools](https://github.com/somaticbits/hentools)
 
