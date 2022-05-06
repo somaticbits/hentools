@@ -30,6 +30,3 @@ async function run(argv) {
 }
 
 module.exports = { run }
-
-// TODO: add formula-as-pricing
-// TODO: add OBJKT number estimation + exact number minting
