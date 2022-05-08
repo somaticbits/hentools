@@ -36,15 +36,12 @@ module.exports = {
         type: 'input',
         name: 'folder',
         message: 'Which folder?'
+      }).catch(() => {
+        print.error('No folder specified!')
       })
       if (result && result.name) {
         folder = result.name
       }
-    }
-
-    if (!folder) {
-      print.error('No folder specified!')
-      return
     }
 
     const Tezos = new TezosToolkit(config.hentools.rpcURL)
