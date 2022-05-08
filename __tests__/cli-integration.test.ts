@@ -27,11 +27,13 @@ const contracts = {
 
 beforeAll(() => generateConfig(testContracts.operatorContract,
                                    testContracts.marketplaceContract,
-                                   testContracts.minterContract))
+                                   testContracts.minterContract,
+                           'http://localhost:20000'))
 afterAll(() => {
   generateConfig(contracts.operatorContract,
                  contracts.marketplaceContract,
-                 contracts.minterContract)
+                 contracts.minterContract,
+         'https://node.somaticbits.xyz')
 })
 
 describe('setup module', () => {
