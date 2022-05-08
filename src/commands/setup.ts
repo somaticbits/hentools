@@ -13,6 +13,10 @@ module.exports = {
 
     const options = parameters.options
     try {
+      if (await tz.getSecretKey() && !options.r) {
+        print.info('Secret key already set.')
+      }
+
       if ((await tz.getSecretKey()) === false) {
         const result = await prompt.ask({
           type: 'input',
