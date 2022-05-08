@@ -1,13 +1,13 @@
 import { filesystem } from 'gluegun'
 const src = filesystem.path(__dirname, '..')
 
-export const generateConfig = (operatorContract, marketplaceContract, minterContract) => {
+export const generateConfig = (operatorContract, marketplaceContract, minterContract, rpcURL) => {
     console.log(`Generating config for ${operatorContract} and ${marketplaceContract}`)
     filesystem.write(filesystem.path(src, 'src', 'hentools.config.js'),
         `module.exports = {
                   name: 'hentools',
                   defaults: {
-                    rpcURL: 'http://localhost:20000',
+                    rpcURL: '${rpcURL}',
                 
                     // IPFS
                     infuraURL: 'https://ipfs.somaticbits.xyz',
