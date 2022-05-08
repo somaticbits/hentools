@@ -157,21 +157,29 @@ tezos-client import secret key bob unencrypted:edsk3RFfvaFaxbHx8BMtEW1rKQcPtDML3
 ```
 6. Create a storage file for origination of the minting contract (tz address is from the alice account)
 ``` sh
-echo '(Pair (Pair "tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb" (Pair 0 {})) (Pair (Pair {Elt "" 0x697066733a2f2f516d504377594b6d45574c4348726e54364b634852456f7a75447165697a696f4865415747766e61614264436f65} {}) (Pair False {})))' >> objkts.storage.tz
+echo '(Pair (Pair "tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb" (Pair 0 {})) (Pair (Pair {Elt "" 0x697066733a2f2f516d504377594b6d45574c4348726e54364b634852456f7a75447165697a696f4865415747766e61614264436f65} {}) (Pair False {})))' > objkts.storage.tz
 ```
 7. Originate the hicetnunc minting contract on the sandbox
 ```sh
 tezos-client originate contract main transferring 1 from alice running ./michelson/fa2_objkts.tz --init "`cat ./objkts.storage.tz`" --burn-cap 2 --force
 ```
-8. Create a storage file for origination of the swap contract (tz address is from the alice account) by replacing 'KT1TezoooozzSmartPyzzSTATiCzzzwwBFA1' with the minting contract address
+8. Create a storage file for origination of the swap v2 contract (tz address is from the alice account) by replacing 'KT1TezoooozzSmartPyzzSTATiCzzzwwBFA1' with the minting contract address
 ``` sh
-echo '(Pair (Pair 500000 (Pair 25 "tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb")) (Pair {Elt "" 0x697066733a2f2f516d57514e41314138634b5a506f61615a4d757153754c75643747515453786262774358685a373644674571484d} (Pair "KT1TezoooozzSmartPyzzSTATiCzzzwwBFA1" {})))' >> objkt_swap.storage.tz
+echo '(Pair (Pair 500000 (Pair 25 "tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb")) (Pair {Elt "" 0x697066733a2f2f516d57514e41314138634b5a506f61615a4d757153754c75643747515453786262774358685a373644674571484d} (Pair "KT1TezoooozzSmartPyzzSTATiCzzzwwBFA1" {})))' > objkt_swap.v2.storage.tz
 ```
-9. Originate the hicetnunc swap contract on the sandbox
+9. Originate the hicetnunc v2 swap contract on the sandbox
 ```sh
-tezos-client originate contract main transferring 1 from alice running ./michelson/objkt_swap_v2_1.tz --init "`cat ./objkt_swap.storage.tz`" --burn-cap 2 --force
+tezos-client originate contract main transferring 1 from alice running ./michelson/objkt_swap_v2_1.tz --init "`cat ./objkt_swap.v2.storage.tz`" --burn-cap 2 --force
 ```
-10. Once the contracts deployed on the sandbox, you need to replace the contracts in the test by the ones from the sandbox
+10. Create a storage file for origination of the swap v1 contract (tz address is from the alice account) by replacing 'KT1TezoooozzSmartPyzzSTATiCzzzwwBFA1' with the minting contract address
+``` sh
+echo '(Pair (Pair (Pair "KT1Tezooo2zzSmartPyzzSTATiCzzzwqqQ4H" "1970-01-01T00:00:00Z") (Pair "KT1Tezooo1zzSmartPyzzSTATiCzzzyfC8eF" (Pair False "tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb"))) (Pair (Pair {Elt "" 0x697066733a2f2f516d645458507a4831657a714d4b59596e554c6e437a3550543741585347615a4867523952426a46734467454354} (Pair "KT1TezoooozzSmartPyzzSTATiCzzzwwBFA1" 152)) (Pair {} (Pair 0 {}))))' > objkt_swap.v1.storage.tz
+```
+11. Originate the hicetnunc v1 swap contract serving as the operator on the sandbox
+```sh
+tezos-client originate contract main transferring 1 from alice running ./michelson/objkt_swap_v1.tz --init "`cat ./objkt_swap.v1.storage.tz`" --burn-cap 2 --force
+```
+12. Once the contracts deployed on the sandbox, you need to replace the contracts in the test by the ones from the sandbox
 
 <!-- CONTACT -->
 ## Contact
