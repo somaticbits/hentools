@@ -23,7 +23,8 @@ module.exports = {
       return
     } else {
       Tezos.setProvider({
-        signer: new InMemorySigner((await tz.getSecretKey())['key'])
+        signer: new InMemorySigner((await tz.getSecretKey())['key']),
+        config: {confirmationPollingIntervalSecond: 3}
       })
     }
 
