@@ -4,8 +4,11 @@ import {InMemorySigner} from '@taquito/signer'
 
 const src = filesystem.path(__dirname, '..')
 
+const delay = (ms) => {
+    return new Promise(resolve => setTimeout(resolve, ms))
+}
+
 export const generateConfig = (operatorContract, marketplaceContract, minterContract, rpcURL, hicdexURL) => {
-    console.log(`Generating config for ${operatorContract} and ${marketplaceContract}`)
     filesystem.write(filesystem.path(src, 'src', 'hentools.config.js'),
         `module.exports = {
                   name: 'hentools',
@@ -38,10 +41,14 @@ export const generateConfig = (operatorContract, marketplaceContract, minterCont
         `)
 }
 
+// GraphQL Mock server
+
 export const runMockServer = () => {
     return system.spawn(`graphql-faker ${filesystem.cwd()}/__tests__/__mocks__/hicdex.schema.graphql`)
         .catch(e => console.error(e))
 }
+
+// Smart contracts sandbox deployment
 
 const originateContract = async (signer, contract, storage) => {
     let address = null
@@ -61,44 +68,37 @@ const originateContract = async (signer, contract, storage) => {
     return address
 }
 
-const delay = (ms) => {
-    return new Promise(resolve => setTimeout(resolve, ms))
-}
-
 export const originateContracts = async () => {
     const Tezos = new TezosToolkit('http://localhost:20000')
     const key = await filesystem.readAsync(`${filesystem.cwd()}/.config/tezos.config.js`).then(res => JSON.parse(res).key)
     Tezos.setProvider({ signer: new InMemorySigner(key) })
 
-    const operatorContract = filesystem.read(`${filesystem.cwd()}/__tests__/__mocks__/contracts/objkts.tz`)
+    let operatorContract = null, marketplaceContract = null, minterContract = null
+
+    const operatorFile = filesystem.read(`${filesystem.cwd()}/__tests__/__mocks__/contracts/objkts.tz`)
     const operatorStorage = filesystem.read(`${filesystem.cwd()}/__tests__/__mocks__/contracts/objkts.storage.tz`)
+    operatorContract = await originateContract(Tezos, operatorFile, operatorStorage)
+    filesystem.write(filesystem.path(src, '__tests__', '__mocks__', 'contracts', 'objkt_swap.v1.storage.tz'), `(Pair (Pair (Pair "KT1Tezooo2zzSmartPyzzSTATiCzzzwqqQ4H" "1970-01-01T00:00:00Z") (Pair "KT1Tezooo1zzSmartPyzzSTATiCzzzyfC8eF" (Pair False "tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb"))) (Pair (Pair {Elt "" 0x697066733a2f2f516d645458507a4831657a714d4b59596e554c6e437a3550543741585347615a4867523952426a46734467454354} (Pair "${operatorContract}" 152)) (Pair {} (Pair 0 {}))))`)
+    await delay(5000)
 
-    const objktSwapContract = filesystem.read(`${filesystem.cwd()}/__tests__/__mocks__/contracts/objkt_swap.v1.tz`)
+    const objktSwapFile = filesystem.read(`${filesystem.cwd()}/__tests__/__mocks__/contracts/objkt_swap.v1.tz`)
     const objktSwapStorage = filesystem.read(`${filesystem.cwd()}/__tests__/__mocks__/contracts/objkt_swap.v1.storage.tz`)
+    minterContract = await originateContract(Tezos, objktSwapFile, objktSwapStorage)
+    filesystem.write(filesystem.path(src, '__tests__', '__mocks__', 'contracts', 'teia_marketplace.storage.tz'), `(Pair (Pair (Pair {Elt "${operatorContract}" Unit} False) (Pair 0 (Pair 25 "KT1QmSmQ8Mj8JHNKKQmepFqQZy7kDWQ1ek69"))) (Pair (Pair "KT1QmSmQ8Mj8JHNKKQmepFqQZy7kDWQ1ek69" {Elt "" 0x697066733a2f2f516d525a595a484672796263735669717064427331686a636d75737652736d61573152756d6438676376416a6244}) (Pair None (Pair {} False))))`)
+    await delay(5000)
 
-    const marketplaceContract = filesystem.read(`${filesystem.cwd()}/__tests__/__mocks__/contracts/teia_marketplace.tz`)
+    const marketplaceFile = filesystem.read(`${filesystem.cwd()}/__tests__/__mocks__/contracts/teia_marketplace.tz`)
     const marketplaceStorage = filesystem.read(`${filesystem.cwd()}/__tests__/__mocks__/contracts/teia_marketplace.storage.tz`)
-
-    let operatorAddress = null, marketplaceAddress = null, objktSwapAddress = null
-
-    operatorAddress = await originateContract(Tezos, operatorContract, operatorStorage)
-    filesystem.write(filesystem.path(src, '__tests__', '__mocks__', 'contracts', 'objkt_swap.v1.storage.tz'), `(Pair (Pair (Pair "KT1Tezooo2zzSmartPyzzSTATiCzzzwqqQ4H" "1970-01-01T00:00:00Z") (Pair "KT1Tezooo1zzSmartPyzzSTATiCzzzyfC8eF" (Pair False "tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb"))) (Pair (Pair {Elt "" 0x697066733a2f2f516d645458507a4831657a714d4b59596e554c6e437a3550543741585347615a4867523952426a46734467454354} (Pair "${operatorAddress}" 152)) (Pair {} (Pair 0 {}))))`)
-    await delay(5000)
-
-    objktSwapAddress = await originateContract(Tezos, objktSwapContract, objktSwapStorage)
-    filesystem.write(filesystem.path(src, '__tests__', '__mocks__', 'contracts', 'teia_marketplace.storage.tz'), `(Pair (Pair 500000 (Pair 25 "tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb")) (Pair {Elt "" 0x697066733a2f2f516d57514e41314138634b5a506f61615a4d757153754c75643747515453786262774358685a373644674571484d} (Pair "${operatorAddress}" {})))`)
-    await delay(5000)
-
-    marketplaceAddress = await originateContract(Tezos, marketplaceContract, marketplaceStorage)
+    marketplaceContract = await originateContract(Tezos, marketplaceFile, marketplaceStorage)
     await delay(5000)
 
     await Tezos.contract
-        .at(operatorAddress)
+        .at(operatorContract)
         .then(contract => {
-            contract.methods.set_administrator(objktSwapAddress).send()
+            contract.methods.set_administrator(minterContract).send()
         })
         .then(() => {
-            console.log(`Waiting for confirmation of set_administrator for ${operatorAddress}`)
+            console.log(`Waiting for confirmation of set_administrator ${minterContract} for ${operatorContract}`)
         })
         .then(() => {
             console.log(`Operation confirmed`)
@@ -107,6 +107,6 @@ export const originateContracts = async () => {
 
     await delay(5000)
 
-    return { operatorAddress, objktSwapAddress, marketplaceAddress }
+    return { operatorContract, marketplaceContract, minterContract }
 }
 
