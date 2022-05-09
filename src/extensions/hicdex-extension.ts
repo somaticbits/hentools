@@ -1,10 +1,9 @@
 import { GluegunToolbox } from 'gluegun'
 
 module.exports = (toolbox: GluegunToolbox) => {
-  const { http, print } = toolbox
+  const { http, print, config } = toolbox
 
-  // const api = http.create({ baseURL: 'https://api.hicdex.com' })
-  const api = http.create({ baseURL: 'https://api.teia.rocks/' })
+  const api = http.create({ baseURL: config.hentools.hicdexURL })
 
   const queryRoyalties = `query Royalties($token: bigint!) {
         hic_et_nunc_token_by_pk(id: $token) {
@@ -49,7 +48,7 @@ module.exports = (toolbox: GluegunToolbox) => {
     operationName: string,
     variables: Record<string, unknown>
   ) => {
-    const result = await api.post('/v1/graphql', {
+    const result = await api.post('/graphql', {
       query: operationsDoc,
       variables: variables,
       operationName: operationName
