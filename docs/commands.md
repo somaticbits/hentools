@@ -21,7 +21,7 @@ Generates Tz Address associated to it via the Tezos Wallet PKH method.
 mint
 
 **SYNOPSIS**  
-``mint [-s] folder``
+``mint [-s] [-t] desiredObjktId folder``
 
 **DESCRIPTION**  
 ``mint`` NFTs by parsing a csv file  from *folder* (file format: *automint.csv*).  
@@ -29,11 +29,15 @@ Uploads the files to IPFS, followed by interaction with hic et nunc's smart cont
 Direct follow-up swapping is possible.
 
 **OPTIONS**  
-``-s`` allows to swap directly after the mint process (*autoswaps.csv* can be generated via the **csv-generator**)
+``-s`` allows to swap directly after the mint process 
+``-t`` allows to mint a certain desired OBJKT ID, works only if the OBJKT ID is not already minted
 
 **EXAMPLE**  
 Minting all images from ``./data`` folder and swapping them after  
 ``hentools mint './data' -s``
+
+Minting OBJKT ID 1000 from ``./data`` folder and swapping them after  
+``hentools mint './data' -t 1000 -s``
 
 ## swap
 **NAME**  
@@ -92,7 +96,7 @@ Buying OBJKT #1234 and #19283
 hicdex
 
 **SYNOPSIS**  
-``hicdex [-c] [-s] [-r] objktId``
+``hicdex [-c] [-s] [-r] [-p] [-a] objktId``
 
 **DESCRIPTION**  
 Pull various informations from ``hicdex.com``. Used by the tools internally.
@@ -100,7 +104,9 @@ Pull various informations from ``hicdex.com``. Used by the tools internally.
 **OPTIONS**  
 ``-c``  get the creator of the OBJKT  
 ``-s``  get the latest Swap ID from the OBJKT from the wallet registered with hentools  
-``-r``  get the royalties from the OBJKT
+``-r``  get the royalties from the OBJKT  
+``-p``  get the price of the OBJKT  
+``-a``  get the amount of the OBJKT owned  
 
 **EXAMPLE**  
 Get the creator of OBJKT #715554  
@@ -112,6 +118,11 @@ Get the latest Swap ID from OBJKT #715554
 Get the royalties from OBJKT #715554  
 ``hentools hicdex -r 715554``
 
+Get the price from OBJKT #715554  
+``hentools hicdex -p 715554``
+
+Get the amount of OBJKT #715554 owned  
+``hentools hicdex -a 715554``
 
 ## transfer
 **NAME**  
@@ -132,3 +143,4 @@ Send OBJKT #715554 to burn address
 
 Send OBJKTs #715554 #715555 #715556 to burn address  
 ``hentools transfer 715554 715555 715556 -t 'tz1burnburnburnburnburnburnburjAYjjX'``
+
