@@ -16,7 +16,7 @@
     "copy-templates": "if [ -e ./src/templates ]; then cp -a ./src/templates ./build/; fi",
     "build": "yarn format && yarn lint && yarn clean-build && yarn compile",
     "prepublishOnly": "yarn build",
-    "test": "jest",
+    "test": "jest --verbose",
     "watch": "jest --watch",
     "snapupdate": "jest --updateSnapshot",
     "coverage": "jest --coverage"
@@ -53,6 +53,7 @@
     "eslint-import-resolver-typescript": "^2.4.0",
     "eslint-plugin-import": "^2.23.4",
     "eslint-plugin-prettier": "^3.4.0",
+    "graphql-faker": "^2.0.0-rc.25",
     "jest": "^24.1.0",
     "mock-stdin": "^1.0.0",
     "prettier": "^1.12.1",
@@ -63,7 +64,9 @@
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node",
-    "testPathIgnorePatterns": ["helpers.ts"]
+    "testPathIgnorePatterns": [
+      "helpers.ts"
+    ]
   },
   "prettier": {
     "semi": false,
