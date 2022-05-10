@@ -1,0 +1,807 @@
+parameter (or (or (nat %cancel_swap) (nat %collect)) (or (pair %swap (pair (address %creator) (nat %objkt_amount)) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) (or (nat %update_fee) (address %update_manager))));
+storage   (pair (pair (nat %counter) (pair (nat %fee) (address %manager))) (pair (big_map %metadata string bytes) (pair (address %objkt) (big_map %swaps nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt))))))));
+code
+  {
+    UNPAIR;     # @parameter : @storage
+    IF_LEFT
+      {
+        IF_LEFT
+          {
+            SWAP;       # @storage : @parameter%cancel_swap
+            # == cancel_swap ==
+            # sp.verify((sp.sender == self.data.swaps[params].issuer) & (self.data.swaps[params].objkt_amount != 0)) # @storage : @parameter%cancel_swap
+            DUP;        # @storage : @storage : @parameter%cancel_swap
+            DUG 2;      # @storage : @parameter%cancel_swap : @storage
+            GET 6;      # big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @parameter%cancel_swap : @storage
+            SWAP;       # @parameter%cancel_swap : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage
+            DUP;        # @parameter%cancel_swap : @parameter%cancel_swap : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage
+            DUG 2;      # @parameter%cancel_swap : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @parameter%cancel_swap : @storage
+            GET;        # option (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @parameter%cancel_swap : @storage
+            IF_NONE
+              {
+                PUSH int 419; # int : @parameter%cancel_swap : @storage
+                FAILWITH;   # FAILED
+              }
+              {}; # @some : @parameter%cancel_swap : @storage
+            CAR;        # pair (address %creator) (pair (address %issuer) (nat %objkt_amount)) : @parameter%cancel_swap : @storage
+            GET 3;      # address : @parameter%cancel_swap : @storage
+            SENDER;     # @sender : address : @parameter%cancel_swap : @storage
+            COMPARE;    # int : @parameter%cancel_swap : @storage
+            EQ;         # bool : @parameter%cancel_swap : @storage
+            IF
+              {
+                PUSH nat 0; # nat : @parameter%cancel_swap : @storage
+                DUP 3;      # @storage : nat : @parameter%cancel_swap : @storage
+                GET 6;      # big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : nat : @parameter%cancel_swap : @storage
+                DUP 3;      # @parameter%cancel_swap : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : nat : @parameter%cancel_swap : @storage
+                GET;        # option (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : nat : @parameter%cancel_swap : @storage
+                IF_NONE
+                  {
+                    PUSH int 419; # int : nat : @parameter%cancel_swap : @storage
+                    FAILWITH;   # FAILED
+                  }
+                  {}; # @some : nat : @parameter%cancel_swap : @storage
+                CAR;        # pair (address %creator) (pair (address %issuer) (nat %objkt_amount)) : nat : @parameter%cancel_swap : @storage
+                GET 4;      # nat : nat : @parameter%cancel_swap : @storage
+                COMPARE;    # int : @parameter%cancel_swap : @storage
+                NEQ;        # bool : @parameter%cancel_swap : @storage
+              }
+              {
+                PUSH bool False; # bool : @parameter%cancel_swap : @storage
+              }; # bool : @parameter%cancel_swap : @storage
+            IF
+              {}
+              {
+                PUSH string "WrongCondition: (sp.sender == self.data.swaps[params].issuer) & (self.data.swaps[params].objkt_amount != 0)"; # string : @parameter%cancel_swap : @storage
+                FAILWITH;   # FAILED
+              }; # @parameter%cancel_swap : @storage
+            # sp.transfer(sp.list([sp.record(from_ = sp.self_address, txs = sp.list([sp.record(to_ = sp.sender, token_id = self.data.swaps[params].objkt_id, amount = self.data.swaps[params].objkt_amount)]))]), sp.tez(0), sp.contract(sp.TList(sp.TRecord(from_ = sp.TAddress, txs = sp.TList(sp.TRecord(amount = sp.TNat, to_ = sp.TAddress, token_id = sp.TNat).layout(("to_", ("token_id", "amount"))))).layout(("from_", "txs"))), self.data.objkt, entry_point='transfer').open_some()) # @parameter%cancel_swap : @storage
+            NIL operation; # list operation : @parameter%cancel_swap : @storage
+            DUP 3;      # @storage : list operation : @parameter%cancel_swap : @storage
+            GET 5;      # address : list operation : @parameter%cancel_swap : @storage
+            CONTRACT %transfer (list (pair (address %from_) (list %txs (pair (address %to_) (pair (nat %token_id) (nat %amount)))))); # option (contract (list (pair (address %from_) (list %txs (pair (address %to_) (pair (nat %token_id) (nat %amount))))))) : list operation : @parameter%cancel_swap : @storage
+            IF_NONE
+              {
+                PUSH int 434; # int : list operation : @parameter%cancel_swap : @storage
+                FAILWITH;   # FAILED
+              }
+              {}; # @some : list operation : @parameter%cancel_swap : @storage
+            PUSH mutez 0; # mutez : @some : list operation : @parameter%cancel_swap : @storage
+            NIL (pair address (list (pair address (pair nat nat)))); # list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @parameter%cancel_swap : @storage
+            NIL (pair address (pair nat nat)); # list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @parameter%cancel_swap : @storage
+            DUP 7;      # @storage : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @parameter%cancel_swap : @storage
+            GET 6;      # big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @parameter%cancel_swap : @storage
+            DUP 7;      # @parameter%cancel_swap : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @parameter%cancel_swap : @storage
+            GET;        # option (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @parameter%cancel_swap : @storage
+            IF_NONE
+              {
+                PUSH int 420; # int : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @parameter%cancel_swap : @storage
+                FAILWITH;   # FAILED
+              }
+              {}; # @some : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @parameter%cancel_swap : @storage
+            CAR;        # pair (address %creator) (pair (address %issuer) (nat %objkt_amount)) : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @parameter%cancel_swap : @storage
+            GET 4;      # nat : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @parameter%cancel_swap : @storage
+            DUP 8;      # @storage : nat : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @parameter%cancel_swap : @storage
+            GET 6;      # big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : nat : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @parameter%cancel_swap : @storage
+            DUP 8;      # @parameter%cancel_swap : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : nat : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @parameter%cancel_swap : @storage
+            GET;        # option (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : nat : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @parameter%cancel_swap : @storage
+            IF_NONE
+              {
+                PUSH int 420; # int : nat : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @parameter%cancel_swap : @storage
+                FAILWITH;   # FAILED
+              }
+              {}; # @some : nat : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @parameter%cancel_swap : @storage
+            GET 3;      # nat : nat : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @parameter%cancel_swap : @storage
+            SENDER;     # @sender : nat : nat : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @parameter%cancel_swap : @storage
+            PAIR 3;     # pair @sender (pair nat nat) : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @parameter%cancel_swap : @storage
+            CONS;       # list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @parameter%cancel_swap : @storage
+            SELF_ADDRESS; # @self : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @parameter%cancel_swap : @storage
+            PAIR;       # pair @self (list (pair address (pair nat nat))) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @parameter%cancel_swap : @storage
+            CONS;       # list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @parameter%cancel_swap : @storage
+            TRANSFER_TOKENS; # operation : list operation : @parameter%cancel_swap : @storage
+            CONS;       # list operation : @parameter%cancel_swap : @storage
+            # del self.data.swaps[params] # list operation : @parameter%cancel_swap : @storage
+            DIG 2;      # @storage : list operation : @parameter%cancel_swap
+            DUP;        # @storage : @storage : list operation : @parameter%cancel_swap
+            GET 6;      # big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%cancel_swap
+            NONE (pair (pair address (pair address nat)) (pair nat (pair nat mutez))); # option (pair (pair address (pair address nat)) (pair nat (pair nat mutez))) : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%cancel_swap
+            DIG 4;      # @parameter%cancel_swap : option (pair (pair address (pair address nat)) (pair nat (pair nat mutez))) : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation
+            UPDATE;     # big_map nat (pair (pair address (pair address nat)) (pair nat (pair nat mutez))) : @storage : list operation
+            UPDATE 6;   # @storage : list operation
+            SWAP;       # list operation : @storage
+          }
+          {
+            # == collect ==
+            # sp.verify((sp.amount == sp.mul(sp.fst(sp.ediv(self.data.swaps[params.swap_id].xtz_per_objkt, sp.mutez(1)).open_some()), sp.mutez(1))) & (self.data.swaps[params.swap_id].objkt_amount != 0)) # @parameter%collect : @storage
+            PUSH mutez 1; # mutez : @parameter%collect : @storage
+            DUP;        # mutez : mutez : @parameter%collect : @storage
+            DUP 4;      # @storage : mutez : mutez : @parameter%collect : @storage
+            GET 6;      # big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : mutez : mutez : @parameter%collect : @storage
+            DUP 4;      # @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : mutez : mutez : @parameter%collect : @storage
+            GET;        # option (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : mutez : mutez : @parameter%collect : @storage
+            IF_NONE
+              {
+                PUSH int 392; # int : mutez : mutez : @parameter%collect : @storage
+                FAILWITH;   # FAILED
+              }
+              {}; # @some : mutez : mutez : @parameter%collect : @storage
+            GET 6;      # mutez : mutez : mutez : @parameter%collect : @storage
+            EDIV;       # option (pair nat mutez) : mutez : @parameter%collect : @storage
+            IF_NONE
+              {
+                PUSH int 392; # int : mutez : @parameter%collect : @storage
+                FAILWITH;   # FAILED
+              }
+              {}; # @some : mutez : @parameter%collect : @storage
+            CAR;        # nat : mutez : @parameter%collect : @storage
+            MUL;        # mutez : @parameter%collect : @storage
+            AMOUNT;     # @amount : mutez : @parameter%collect : @storage
+            COMPARE;    # int : @parameter%collect : @storage
+            EQ;         # bool : @parameter%collect : @storage
+            IF
+              {
+                PUSH nat 0; # nat : @parameter%collect : @storage
+                DUP 3;      # @storage : nat : @parameter%collect : @storage
+                GET 6;      # big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : nat : @parameter%collect : @storage
+                DUP 3;      # @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : nat : @parameter%collect : @storage
+                GET;        # option (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : nat : @parameter%collect : @storage
+                IF_NONE
+                  {
+                    PUSH int 392; # int : nat : @parameter%collect : @storage
+                    FAILWITH;   # FAILED
+                  }
+                  {}; # @some : nat : @parameter%collect : @storage
+                CAR;        # pair (address %creator) (pair (address %issuer) (nat %objkt_amount)) : nat : @parameter%collect : @storage
+                GET 4;      # nat : nat : @parameter%collect : @storage
+                COMPARE;    # int : @parameter%collect : @storage
+                NEQ;        # bool : @parameter%collect : @storage
+              }
+              {
+                PUSH bool False; # bool : @parameter%collect : @storage
+              }; # bool : @parameter%collect : @storage
+            IF
+              {}
+              {
+                PUSH string "WrongCondition: (sp.amount == sp.mul(sp.fst(sp.ediv(self.data.swaps[params.swap_id].xtz_per_objkt, sp.mutez(1)).open_some()), sp.mutez(1))) & (self.data.swaps[params.swap_id].objkt_amount != 0)"; # string : @parameter%collect : @storage
+                FAILWITH;   # FAILED
+              }; # @parameter%collect : @storage
+            # if self.data.swaps[params.swap_id].xtz_per_objkt != sp.tez(0): # @parameter%collect : @storage
+            PUSH mutez 0; # mutez : @parameter%collect : @storage
+            DUP 3;      # @storage : mutez : @parameter%collect : @storage
+            GET 6;      # big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : mutez : @parameter%collect : @storage
+            DUP 3;      # @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : mutez : @parameter%collect : @storage
+            GET;        # option (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : mutez : @parameter%collect : @storage
+            IF_NONE
+              {
+                PUSH int 396; # int : mutez : @parameter%collect : @storage
+                FAILWITH;   # FAILED
+              }
+              {}; # @some : mutez : @parameter%collect : @storage
+            GET 6;      # mutez : mutez : @parameter%collect : @storage
+            COMPARE;    # int : @parameter%collect : @storage
+            NEQ;        # bool : @parameter%collect : @storage
+            IF
+              {
+                # sp.send(self.data.swaps[params.swap_id].creator, sp.mul((self.data.swaps[params.swap_id].royalties * ((sp.fst(sp.ediv(self.data.swaps[params.swap_id].xtz_per_objkt, sp.mutez(1)).open_some()) * (self.data.swaps[params.swap_id].royalties + self.data.fee)) // 1000)) // (self.data.swaps[params.swap_id].royalties + self.data.fee), sp.mutez(1))) # @parameter%collect : @storage
+                NIL operation; # list operation : @parameter%collect : @storage
+                DUP 3;      # @storage : list operation : @parameter%collect : @storage
+                GET 6;      # big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : list operation : @parameter%collect : @storage
+                DUP 3;      # @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : list operation : @parameter%collect : @storage
+                GET;        # option (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : list operation : @parameter%collect : @storage
+                IF_NONE
+                  {
+                    PUSH int 405; # int : list operation : @parameter%collect : @storage
+                    FAILWITH;   # FAILED
+                  }
+                  {}; # @some : list operation : @parameter%collect : @storage
+                CAR;        # pair (address %creator) (pair (address %issuer) (nat %objkt_amount)) : list operation : @parameter%collect : @storage
+                CAR;        # address : list operation : @parameter%collect : @storage
+                CONTRACT unit; # option (contract unit) : list operation : @parameter%collect : @storage
+                IF_NONE
+                  {
+                    PUSH int 405; # int : list operation : @parameter%collect : @storage
+                    FAILWITH;   # FAILED
+                  }
+                  {}; # @some : list operation : @parameter%collect : @storage
+                PUSH mutez 1; # mutez : @some : list operation : @parameter%collect : @storage
+                DIG 4;      # @storage : mutez : @some : list operation : @parameter%collect
+                DUP;        # @storage : @storage : mutez : @some : list operation : @parameter%collect
+                CAR;        # pair (nat %counter) (pair (nat %fee) (address %manager)) : @storage : mutez : @some : list operation : @parameter%collect
+                GET 3;      # nat : @storage : mutez : @some : list operation : @parameter%collect
+                SWAP;       # @storage : nat : mutez : @some : list operation : @parameter%collect
+                DUP;        # @storage : @storage : nat : mutez : @some : list operation : @parameter%collect
+                DUG 6;      # @storage : nat : mutez : @some : list operation : @parameter%collect : @storage
+                GET 6;      # big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : nat : mutez : @some : list operation : @parameter%collect : @storage
+                DUP 6;      # @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : nat : mutez : @some : list operation : @parameter%collect : @storage
+                GET;        # option (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : nat : mutez : @some : list operation : @parameter%collect : @storage
+                IF_NONE
+                  {
+                    PUSH int 402; # int : nat : mutez : @some : list operation : @parameter%collect : @storage
+                    FAILWITH;   # FAILED
+                  }
+                  {}; # @some : nat : mutez : @some : list operation : @parameter%collect : @storage
+                GET 5;      # nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                ADD;        # nat : mutez : @some : list operation : @parameter%collect : @storage
+                PUSH nat 1000; # nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                DIG 6;      # @storage : nat : nat : mutez : @some : list operation : @parameter%collect
+                DUP;        # @storage : @storage : nat : nat : mutez : @some : list operation : @parameter%collect
+                CAR;        # pair (nat %counter) (pair (nat %fee) (address %manager)) : @storage : nat : nat : mutez : @some : list operation : @parameter%collect
+                GET 3;      # nat : @storage : nat : nat : mutez : @some : list operation : @parameter%collect
+                SWAP;       # @storage : nat : nat : nat : mutez : @some : list operation : @parameter%collect
+                DUP;        # @storage : @storage : nat : nat : nat : mutez : @some : list operation : @parameter%collect
+                DUG 8;      # @storage : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                GET 6;      # big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                DUP 8;      # @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                GET;        # option (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                IF_NONE
+                  {
+                    PUSH int 401; # int : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                    FAILWITH;   # FAILED
+                  }
+                  {}; # @some : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                GET 5;      # nat : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                ADD;        # nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                PUSH mutez 1; # mutez : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                DUP 9;      # @storage : mutez : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                GET 6;      # big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : mutez : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                DUP 9;      # @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : mutez : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                GET;        # option (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : mutez : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                IF_NONE
+                  {
+                    PUSH int 398; # int : mutez : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                    FAILWITH;   # FAILED
+                  }
+                  {}; # @some : mutez : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                GET 6;      # mutez : mutez : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                EDIV;       # option (pair nat mutez) : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                IF_NONE
+                  {
+                    PUSH int 398; # int : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                    FAILWITH;   # FAILED
+                  }
+                  {}; # @some : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                CAR;        # nat : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                MUL;        # nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                EDIV;       # option (pair nat nat) : nat : mutez : @some : list operation : @parameter%collect : @storage
+                IF_NONE
+                  {
+                    PUSH int 401; # int : nat : mutez : @some : list operation : @parameter%collect : @storage
+                    FAILWITH;   # FAILED
+                  }
+                  {
+                    CAR;        # nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                  }; # nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                DUP 7;      # @storage : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                GET 6;      # big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                DUP 7;      # @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                GET;        # option (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                IF_NONE
+                  {
+                    PUSH int 402; # int : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                    FAILWITH;   # FAILED
+                  }
+                  {}; # @some : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                GET 5;      # nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                MUL;        # nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                EDIV;       # option (pair nat nat) : mutez : @some : list operation : @parameter%collect : @storage
+                IF_NONE
+                  {
+                    PUSH int 402; # int : mutez : @some : list operation : @parameter%collect : @storage
+                    FAILWITH;   # FAILED
+                  }
+                  {
+                    CAR;        # nat : mutez : @some : list operation : @parameter%collect : @storage
+                  }; # nat : mutez : @some : list operation : @parameter%collect : @storage
+                MUL;        # mutez : @some : list operation : @parameter%collect : @storage
+                UNIT;       # unit : mutez : @some : list operation : @parameter%collect : @storage
+                TRANSFER_TOKENS; # operation : list operation : @parameter%collect : @storage
+                CONS;       # list operation : @parameter%collect : @storage
+                # sp.send(self.data.manager, sp.mul(abs(((sp.fst(sp.ediv(self.data.swaps[params.swap_id].xtz_per_objkt, sp.mutez(1)).open_some()) * (self.data.swaps[params.swap_id].royalties + self.data.fee)) // 1000) - ((self.data.swaps[params.swap_id].royalties * ((sp.fst(sp.ediv(self.data.swaps[params.swap_id].xtz_per_objkt, sp.mutez(1)).open_some()) * (self.data.swaps[params.swap_id].royalties + self.data.fee)) // 1000)) // (self.data.swaps[params.swap_id].royalties + self.data.fee))), sp.mutez(1))) # list operation : @parameter%collect : @storage
+                DUP 3;      # @storage : list operation : @parameter%collect : @storage
+                CAR;        # pair (nat %counter) (pair (nat %fee) (address %manager)) : list operation : @parameter%collect : @storage
+                GET 4;      # address : list operation : @parameter%collect : @storage
+                CONTRACT unit; # option (contract unit) : list operation : @parameter%collect : @storage
+                IF_NONE
+                  {
+                    PUSH int 408; # int : list operation : @parameter%collect : @storage
+                    FAILWITH;   # FAILED
+                  }
+                  {}; # @some : list operation : @parameter%collect : @storage
+                PUSH mutez 1; # mutez : @some : list operation : @parameter%collect : @storage
+                DIG 4;      # @storage : mutez : @some : list operation : @parameter%collect
+                DUP;        # @storage : @storage : mutez : @some : list operation : @parameter%collect
+                CAR;        # pair (nat %counter) (pair (nat %fee) (address %manager)) : @storage : mutez : @some : list operation : @parameter%collect
+                GET 3;      # nat : @storage : mutez : @some : list operation : @parameter%collect
+                SWAP;       # @storage : nat : mutez : @some : list operation : @parameter%collect
+                DUP;        # @storage : @storage : nat : mutez : @some : list operation : @parameter%collect
+                DUG 6;      # @storage : nat : mutez : @some : list operation : @parameter%collect : @storage
+                GET 6;      # big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : nat : mutez : @some : list operation : @parameter%collect : @storage
+                DUP 6;      # @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : nat : mutez : @some : list operation : @parameter%collect : @storage
+                GET;        # option (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : nat : mutez : @some : list operation : @parameter%collect : @storage
+                IF_NONE
+                  {
+                    PUSH int 402; # int : nat : mutez : @some : list operation : @parameter%collect : @storage
+                    FAILWITH;   # FAILED
+                  }
+                  {}; # @some : nat : mutez : @some : list operation : @parameter%collect : @storage
+                GET 5;      # nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                ADD;        # nat : mutez : @some : list operation : @parameter%collect : @storage
+                PUSH nat 1000; # nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                DIG 6;      # @storage : nat : nat : mutez : @some : list operation : @parameter%collect
+                DUP;        # @storage : @storage : nat : nat : mutez : @some : list operation : @parameter%collect
+                CAR;        # pair (nat %counter) (pair (nat %fee) (address %manager)) : @storage : nat : nat : mutez : @some : list operation : @parameter%collect
+                GET 3;      # nat : @storage : nat : nat : mutez : @some : list operation : @parameter%collect
+                SWAP;       # @storage : nat : nat : nat : mutez : @some : list operation : @parameter%collect
+                DUP;        # @storage : @storage : nat : nat : nat : mutez : @some : list operation : @parameter%collect
+                DUG 8;      # @storage : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                GET 6;      # big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                DUP 8;      # @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                GET;        # option (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                IF_NONE
+                  {
+                    PUSH int 401; # int : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                    FAILWITH;   # FAILED
+                  }
+                  {}; # @some : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                GET 5;      # nat : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                ADD;        # nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                PUSH mutez 1; # mutez : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                DUP 9;      # @storage : mutez : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                GET 6;      # big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : mutez : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                DUP 9;      # @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : mutez : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                GET;        # option (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : mutez : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                IF_NONE
+                  {
+                    PUSH int 398; # int : mutez : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                    FAILWITH;   # FAILED
+                  }
+                  {}; # @some : mutez : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                GET 6;      # mutez : mutez : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                EDIV;       # option (pair nat mutez) : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                IF_NONE
+                  {
+                    PUSH int 398; # int : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                    FAILWITH;   # FAILED
+                  }
+                  {}; # @some : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                CAR;        # nat : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                MUL;        # nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                EDIV;       # option (pair nat nat) : nat : mutez : @some : list operation : @parameter%collect : @storage
+                IF_NONE
+                  {
+                    PUSH int 401; # int : nat : mutez : @some : list operation : @parameter%collect : @storage
+                    FAILWITH;   # FAILED
+                  }
+                  {
+                    CAR;        # nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                  }; # nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                DUP 7;      # @storage : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                GET 6;      # big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                DUP 7;      # @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                GET;        # option (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                IF_NONE
+                  {
+                    PUSH int 402; # int : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                    FAILWITH;   # FAILED
+                  }
+                  {}; # @some : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                GET 5;      # nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                MUL;        # nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                EDIV;       # option (pair nat nat) : mutez : @some : list operation : @parameter%collect : @storage
+                IF_NONE
+                  {
+                    PUSH int 402; # int : mutez : @some : list operation : @parameter%collect : @storage
+                    FAILWITH;   # FAILED
+                  }
+                  {
+                    CAR;        # nat : mutez : @some : list operation : @parameter%collect : @storage
+                  }; # nat : mutez : @some : list operation : @parameter%collect : @storage
+                PUSH nat 1000; # nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                DIG 6;      # @storage : nat : nat : mutez : @some : list operation : @parameter%collect
+                DUP;        # @storage : @storage : nat : nat : mutez : @some : list operation : @parameter%collect
+                CAR;        # pair (nat %counter) (pair (nat %fee) (address %manager)) : @storage : nat : nat : mutez : @some : list operation : @parameter%collect
+                GET 3;      # nat : @storage : nat : nat : mutez : @some : list operation : @parameter%collect
+                SWAP;       # @storage : nat : nat : nat : mutez : @some : list operation : @parameter%collect
+                DUP;        # @storage : @storage : nat : nat : nat : mutez : @some : list operation : @parameter%collect
+                DUG 8;      # @storage : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                GET 6;      # big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                DUP 8;      # @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                GET;        # option (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                IF_NONE
+                  {
+                    PUSH int 401; # int : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                    FAILWITH;   # FAILED
+                  }
+                  {}; # @some : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                GET 5;      # nat : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                ADD;        # nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                PUSH mutez 1; # mutez : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                DUP 9;      # @storage : mutez : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                GET 6;      # big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : mutez : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                DUP 9;      # @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : mutez : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                GET;        # option (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : mutez : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                IF_NONE
+                  {
+                    PUSH int 398; # int : mutez : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                    FAILWITH;   # FAILED
+                  }
+                  {}; # @some : mutez : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                GET 6;      # mutez : mutez : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                EDIV;       # option (pair nat mutez) : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                IF_NONE
+                  {
+                    PUSH int 398; # int : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                    FAILWITH;   # FAILED
+                  }
+                  {}; # @some : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                CAR;        # nat : nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                MUL;        # nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                EDIV;       # option (pair nat nat) : nat : mutez : @some : list operation : @parameter%collect : @storage
+                IF_NONE
+                  {
+                    PUSH int 401; # int : nat : mutez : @some : list operation : @parameter%collect : @storage
+                    FAILWITH;   # FAILED
+                  }
+                  {
+                    CAR;        # nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                  }; # nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                SUB;        # int : mutez : @some : list operation : @parameter%collect : @storage
+                ABS;        # nat : mutez : @some : list operation : @parameter%collect : @storage
+                MUL;        # mutez : @some : list operation : @parameter%collect : @storage
+                UNIT;       # unit : mutez : @some : list operation : @parameter%collect : @storage
+                TRANSFER_TOKENS; # operation : list operation : @parameter%collect : @storage
+                CONS;       # list operation : @parameter%collect : @storage
+                # sp.send(self.data.swaps[params.swap_id].issuer, sp.amount - sp.mul((sp.fst(sp.ediv(self.data.swaps[params.swap_id].xtz_per_objkt, sp.mutez(1)).open_some()) * (self.data.swaps[params.swap_id].royalties + self.data.fee)) // 1000, sp.mutez(1))) # list operation : @parameter%collect : @storage
+                DUP 3;      # @storage : list operation : @parameter%collect : @storage
+                GET 6;      # big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : list operation : @parameter%collect : @storage
+                DUP 3;      # @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : list operation : @parameter%collect : @storage
+                GET;        # option (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : list operation : @parameter%collect : @storage
+                IF_NONE
+                  {
+                    PUSH int 411; # int : list operation : @parameter%collect : @storage
+                    FAILWITH;   # FAILED
+                  }
+                  {}; # @some : list operation : @parameter%collect : @storage
+                CAR;        # pair (address %creator) (pair (address %issuer) (nat %objkt_amount)) : list operation : @parameter%collect : @storage
+                GET 3;      # address : list operation : @parameter%collect : @storage
+                CONTRACT unit; # option (contract unit) : list operation : @parameter%collect : @storage
+                IF_NONE
+                  {
+                    PUSH int 411; # int : list operation : @parameter%collect : @storage
+                    FAILWITH;   # FAILED
+                  }
+                  {}; # @some : list operation : @parameter%collect : @storage
+                PUSH mutez 1; # mutez : @some : list operation : @parameter%collect : @storage
+                PUSH nat 1000; # nat : mutez : @some : list operation : @parameter%collect : @storage
+                DIG 5;      # @storage : nat : mutez : @some : list operation : @parameter%collect
+                DUP;        # @storage : @storage : nat : mutez : @some : list operation : @parameter%collect
+                CAR;        # pair (nat %counter) (pair (nat %fee) (address %manager)) : @storage : nat : mutez : @some : list operation : @parameter%collect
+                GET 3;      # nat : @storage : nat : mutez : @some : list operation : @parameter%collect
+                SWAP;       # @storage : nat : nat : mutez : @some : list operation : @parameter%collect
+                DUP;        # @storage : @storage : nat : nat : mutez : @some : list operation : @parameter%collect
+                DUG 7;      # @storage : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                GET 6;      # big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                DUP 7;      # @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                GET;        # option (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                IF_NONE
+                  {
+                    PUSH int 401; # int : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                    FAILWITH;   # FAILED
+                  }
+                  {}; # @some : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                GET 5;      # nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                ADD;        # nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                PUSH mutez 1; # mutez : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                DUP 8;      # @storage : mutez : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                GET 6;      # big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : mutez : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                DUP 8;      # @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : mutez : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                GET;        # option (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : mutez : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                IF_NONE
+                  {
+                    PUSH int 398; # int : mutez : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                    FAILWITH;   # FAILED
+                  }
+                  {}; # @some : mutez : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                GET 6;      # mutez : mutez : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                EDIV;       # option (pair nat mutez) : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                IF_NONE
+                  {
+                    PUSH int 398; # int : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                    FAILWITH;   # FAILED
+                  }
+                  {}; # @some : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                CAR;        # nat : nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                MUL;        # nat : nat : mutez : @some : list operation : @parameter%collect : @storage
+                EDIV;       # option (pair nat nat) : mutez : @some : list operation : @parameter%collect : @storage
+                IF_NONE
+                  {
+                    PUSH int 401; # int : mutez : @some : list operation : @parameter%collect : @storage
+                    FAILWITH;   # FAILED
+                  }
+                  {
+                    CAR;        # nat : mutez : @some : list operation : @parameter%collect : @storage
+                  }; # nat : mutez : @some : list operation : @parameter%collect : @storage
+                MUL;        # mutez : @some : list operation : @parameter%collect : @storage
+                AMOUNT;     # @amount : mutez : @some : list operation : @parameter%collect : @storage
+                SUB_MUTEZ;  # option mutez : @some : list operation : @parameter%collect : @storage
+                IF_NONE
+                  {
+                    PUSH int 411; # int : @some : list operation : @parameter%collect : @storage
+                    FAILWITH;   # FAILED
+                  }
+                  {}; # @some : @some : list operation : @parameter%collect : @storage
+                UNIT;       # unit : @some : @some : list operation : @parameter%collect : @storage
+                TRANSFER_TOKENS; # operation : list operation : @parameter%collect : @storage
+                CONS;       # list operation : @parameter%collect : @storage
+              }
+              {
+                NIL operation; # list operation : @parameter%collect : @storage
+              }; # list operation : @parameter%collect : @storage
+            # self.data.swaps[params.swap_id].objkt_amount = sp.as_nat(self.data.swaps[params.swap_id].objkt_amount - 1) # list operation : @parameter%collect : @storage
+            DUP 3;      # @storage : list operation : @parameter%collect : @storage
+            DUP;        # @storage : @storage : list operation : @parameter%collect : @storage
+            GET 6;      # big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%collect : @storage
+            DUP;        # big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%collect : @storage
+            DUP 5;      # @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%collect : @storage
+            DUP;        # @parameter%collect : @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%collect : @storage
+            DUG 2;      # @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%collect : @storage
+            GET;        # option (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%collect : @storage
+            IF_NONE
+              {
+                PUSH int 413; # int : @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%collect : @storage
+                FAILWITH;   # FAILED
+              }
+              {}; # @some : @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%collect : @storage
+            UNPAIR;     # pair (address %creator) (pair (address %issuer) (nat %objkt_amount)) : pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)) : @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%collect : @storage
+            UNPAIR;     # address : pair (address %issuer) (nat %objkt_amount) : pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)) : @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%collect : @storage
+            SWAP;       # pair (address %issuer) (nat %objkt_amount) : address : pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)) : @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%collect : @storage
+            CAR;        # address : address : pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)) : @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%collect : @storage
+            PUSH nat 1; # nat : address : address : pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)) : @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%collect : @storage
+            DIG 9;      # @storage : nat : address : address : pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)) : @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%collect
+            GET 6;      # big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : nat : address : address : pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)) : @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%collect
+            DUP 10;     # @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : nat : address : address : pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)) : @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%collect
+            GET;        # option (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : nat : address : address : pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)) : @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%collect
+            IF_NONE
+              {
+                PUSH int 413; # int : nat : address : address : pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)) : @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%collect
+                FAILWITH;   # FAILED
+              }
+              {}; # @some : nat : address : address : pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)) : @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%collect
+            CAR;        # pair (address %creator) (pair (address %issuer) (nat %objkt_amount)) : nat : address : address : pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)) : @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%collect
+            GET 4;      # nat : nat : address : address : pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)) : @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%collect
+            SUB;        # int : address : address : pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)) : @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%collect
+            ISNAT;      # option nat : address : address : pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)) : @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%collect
+            IF_NONE
+              {
+                PUSH int 413; # int : address : address : pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)) : @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%collect
+                FAILWITH;   # FAILED
+              }
+              {}; # @some : address : address : pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)) : @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%collect
+            SWAP;       # address : @some : address : pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)) : @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%collect
+            PAIR;       # pair address @some : address : pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)) : @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%collect
+            SWAP;       # address : pair address @some : pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)) : @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%collect
+            PAIR;       # pair address (pair address @some) : pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)) : @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%collect
+            PAIR;       # pair (pair address (pair address @some)) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt))) : @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%collect
+            SOME;       # option (pair (pair address (pair address @some)) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%collect
+            SWAP;       # @parameter%collect : option (pair (pair address (pair address @some)) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%collect
+            UPDATE;     # big_map nat (pair (pair address (pair address nat)) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%collect
+            UPDATE 6;   # @storage : list operation : @parameter%collect
+            # sp.transfer(sp.list([sp.record(from_ = sp.self_address, txs = sp.list([sp.record(to_ = sp.sender, token_id = self.data.swaps[params.swap_id].objkt_id, amount = 1)]))]), sp.tez(0), sp.contract(sp.TList(sp.TRecord(from_ = sp.TAddress, txs = sp.TList(sp.TRecord(amount = sp.TNat, to_ = sp.TAddress, token_id = sp.TNat).layout(("to_", ("token_id", "amount"))))).layout(("from_", "txs"))), self.data.objkt, entry_point='transfer').open_some()) # @storage : list operation : @parameter%collect
+            DUP;        # @storage : @storage : list operation : @parameter%collect
+            DUG 3;      # @storage : list operation : @parameter%collect : @storage
+            GET 5;      # address : list operation : @parameter%collect : @storage
+            CONTRACT %transfer (list (pair (address %from_) (list %txs (pair (address %to_) (pair (nat %token_id) (nat %amount)))))); # option (contract (list (pair (address %from_) (list %txs (pair (address %to_) (pair (nat %token_id) (nat %amount))))))) : list operation : @parameter%collect : @storage
+            IF_NONE
+              {
+                PUSH int 434; # int : list operation : @parameter%collect : @storage
+                FAILWITH;   # FAILED
+              }
+              {}; # @some : list operation : @parameter%collect : @storage
+            PUSH mutez 0; # mutez : @some : list operation : @parameter%collect : @storage
+            NIL (pair address (list (pair address (pair nat nat)))); # list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @parameter%collect : @storage
+            NIL (pair address (pair nat nat)); # list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @parameter%collect : @storage
+            PUSH nat 1; # nat : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @parameter%collect : @storage
+            DUP 8;      # @storage : nat : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @parameter%collect : @storage
+            GET 6;      # big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : nat : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @parameter%collect : @storage
+            DIG 7;      # @parameter%collect : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : nat : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @storage
+            GET;        # option (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : nat : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @storage
+            IF_NONE
+              {
+                PUSH int 415; # int : nat : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @storage
+                FAILWITH;   # FAILED
+              }
+              {}; # @some : nat : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @storage
+            GET 3;      # nat : nat : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @storage
+            SENDER;     # @sender : nat : nat : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @storage
+            PAIR 3;     # pair @sender (pair nat nat) : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @storage
+            CONS;       # list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @storage
+            SELF_ADDRESS; # @self : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @storage
+            PAIR;       # pair @self (list (pair address (pair nat nat))) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @storage
+            CONS;       # list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @storage
+            TRANSFER_TOKENS; # operation : list operation : @storage
+            CONS;       # list operation : @storage
+          }; # list operation : @storage
+      }
+      {
+        IF_LEFT
+          {
+            # == swap ==
+            # sp.verify((params.objkt_amount > 0) & ((params.royalties >= 0) & (params.royalties <= 250))) # @parameter%swap : @storage
+            DUP;        # @parameter%swap : @parameter%swap : @storage
+            CAR;        # pair (address %creator) (nat %objkt_amount) : @parameter%swap : @storage
+            CDR;        # nat : @parameter%swap : @storage
+            PUSH nat 0; # nat : nat : @parameter%swap : @storage
+            COMPARE;    # int : @parameter%swap : @storage
+            LT;         # bool : @parameter%swap : @storage
+            IF
+              {
+                DUP;        # @parameter%swap : @parameter%swap : @storage
+                GET 5;      # nat : @parameter%swap : @storage
+                PUSH nat 0; # nat : nat : @parameter%swap : @storage
+                SWAP;       # nat : nat : @parameter%swap : @storage
+                COMPARE;    # int : @parameter%swap : @storage
+                GE;         # bool : @parameter%swap : @storage
+                IF
+                  {
+                    DUP;        # @parameter%swap : @parameter%swap : @storage
+                    GET 5;      # nat : @parameter%swap : @storage
+                    PUSH nat 250; # nat : nat : @parameter%swap : @storage
+                    SWAP;       # nat : nat : @parameter%swap : @storage
+                    COMPARE;    # int : @parameter%swap : @storage
+                    LE;         # bool : @parameter%swap : @storage
+                  }
+                  {
+                    PUSH bool False; # bool : @parameter%swap : @storage
+                  }; # bool : @parameter%swap : @storage
+              }
+              {
+                PUSH bool False; # bool : @parameter%swap : @storage
+              }; # bool : @parameter%swap : @storage
+            IF
+              {}
+              {
+                PUSH string "WrongCondition: (params.objkt_amount > 0) & ((params.royalties >= 0) & (params.royalties <= 250))"; # string : @parameter%swap : @storage
+                FAILWITH;   # FAILED
+              }; # @parameter%swap : @storage
+            # sp.transfer(sp.list([sp.record(from_ = sp.sender, txs = sp.list([sp.record(to_ = sp.self_address, token_id = params.objkt_id, amount = params.objkt_amount)]))]), sp.tez(0), sp.contract(sp.TList(sp.TRecord(from_ = sp.TAddress, txs = sp.TList(sp.TRecord(amount = sp.TNat, to_ = sp.TAddress, token_id = sp.TNat).layout(("to_", ("token_id", "amount"))))).layout(("from_", "txs"))), self.data.objkt, entry_point='transfer').open_some()) # @parameter%swap : @storage
+            NIL operation; # list operation : @parameter%swap : @storage
+            DUP 3;      # @storage : list operation : @parameter%swap : @storage
+            GET 5;      # address : list operation : @parameter%swap : @storage
+            CONTRACT %transfer (list (pair (address %from_) (list %txs (pair (address %to_) (pair (nat %token_id) (nat %amount)))))); # option (contract (list (pair (address %from_) (list %txs (pair (address %to_) (pair (nat %token_id) (nat %amount))))))) : list operation : @parameter%swap : @storage
+            IF_NONE
+              {
+                PUSH int 434; # int : list operation : @parameter%swap : @storage
+                FAILWITH;   # FAILED
+              }
+              {}; # @some : list operation : @parameter%swap : @storage
+            PUSH mutez 0; # mutez : @some : list operation : @parameter%swap : @storage
+            NIL (pair address (list (pair address (pair nat nat)))); # list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @parameter%swap : @storage
+            NIL (pair address (pair nat nat)); # list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @parameter%swap : @storage
+            DIG 5;      # @parameter%swap : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @storage
+            DUP;        # @parameter%swap : @parameter%swap : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @storage
+            CAR;        # pair (address %creator) (nat %objkt_amount) : @parameter%swap : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @storage
+            CDR;        # nat : @parameter%swap : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @storage
+            SWAP;       # @parameter%swap : nat : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @storage
+            DUP;        # @parameter%swap : @parameter%swap : nat : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @storage
+            DUG 7;      # @parameter%swap : nat : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @parameter%swap : @storage
+            GET 3;      # nat : nat : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @parameter%swap : @storage
+            SELF_ADDRESS; # @self : nat : nat : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @parameter%swap : @storage
+            PAIR 3;     # pair @self (pair nat nat) : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @parameter%swap : @storage
+            CONS;       # list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @parameter%swap : @storage
+            SENDER;     # @sender : list (pair address (pair nat nat)) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @parameter%swap : @storage
+            PAIR;       # pair @sender (list (pair address (pair nat nat))) : list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @parameter%swap : @storage
+            CONS;       # list (pair address (list (pair address (pair nat nat)))) : mutez : @some : list operation : @parameter%swap : @storage
+            TRANSFER_TOKENS; # operation : list operation : @parameter%swap : @storage
+            CONS;       # list operation : @parameter%swap : @storage
+            # self.data.swaps[self.data.counter] = sp.record(creator = params.creator, issuer = sp.sender, objkt_amount = params.objkt_amount, objkt_id = params.objkt_id, royalties = params.royalties, xtz_per_objkt = params.xtz_per_objkt) # list operation : @parameter%swap : @storage
+            DUP 3;      # @storage : list operation : @parameter%swap : @storage
+            DUP;        # @storage : @storage : list operation : @parameter%swap : @storage
+            GET 6;      # big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%swap : @storage
+            DIG 3;      # @parameter%swap : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @storage
+            DUP;        # @parameter%swap : @parameter%swap : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @storage
+            GET 6;      # mutez : @parameter%swap : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @storage
+            SWAP;       # @parameter%swap : mutez : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @storage
+            DUP;        # @parameter%swap : @parameter%swap : mutez : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @storage
+            DUG 5;      # @parameter%swap : mutez : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%swap : @storage
+            GET 5;      # nat : mutez : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%swap : @storage
+            PAIR;       # pair nat mutez : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%swap : @storage
+            DUP 5;      # @parameter%swap : pair nat mutez : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%swap : @storage
+            GET 3;      # nat : pair nat mutez : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%swap : @storage
+            PAIR;       # pair nat (pair nat mutez) : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%swap : @storage
+            DUP 5;      # @parameter%swap : pair nat (pair nat mutez) : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%swap : @storage
+            CAR;        # pair (address %creator) (nat %objkt_amount) : pair nat (pair nat mutez) : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%swap : @storage
+            CDR;        # nat : pair nat (pair nat mutez) : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%swap : @storage
+            SENDER;     # @sender : nat : pair nat (pair nat mutez) : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%swap : @storage
+            PAIR;       # pair @sender nat : pair nat (pair nat mutez) : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @parameter%swap : @storage
+            DIG 5;      # @parameter%swap : pair @sender nat : pair nat (pair nat mutez) : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @storage
+            CAR;        # pair (address %creator) (nat %objkt_amount) : pair @sender nat : pair nat (pair nat mutez) : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @storage
+            CAR;        # address : pair @sender nat : pair nat (pair nat mutez) : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @storage
+            PAIR;       # pair address (pair @sender nat) : pair nat (pair nat mutez) : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @storage
+            PAIR;       # pair (pair address (pair @sender nat)) (pair nat (pair nat mutez)) : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @storage
+            SOME;       # option (pair (pair address (pair @sender nat)) (pair nat (pair nat mutez))) : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation : @storage
+            DIG 4;      # @storage : option (pair (pair address (pair @sender nat)) (pair nat (pair nat mutez))) : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation
+            CAR;        # pair (nat %counter) (pair (nat %fee) (address %manager)) : option (pair (pair address (pair @sender nat)) (pair nat (pair nat mutez))) : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation
+            CAR;        # nat : option (pair (pair address (pair @sender nat)) (pair nat (pair nat mutez))) : big_map nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))) : @storage : list operation
+            UPDATE;     # big_map nat (pair (pair address (pair address nat)) (pair nat (pair nat mutez))) : @storage : list operation
+            UPDATE 6;   # @storage : list operation
+            # self.data.counter += 1 # @storage : list operation
+            UNPAIR;     # pair (nat %counter) (pair (nat %fee) (address %manager)) : pair (big_map %metadata string bytes) (pair (address %objkt) (big_map %swaps nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))))) : list operation
+            UNPAIR;     # nat : pair (nat %fee) (address %manager) : pair (big_map %metadata string bytes) (pair (address %objkt) (big_map %swaps nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))))) : list operation
+            PUSH nat 1; # nat : nat : pair (nat %fee) (address %manager) : pair (big_map %metadata string bytes) (pair (address %objkt) (big_map %swaps nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))))) : list operation
+            ADD;        # nat : pair (nat %fee) (address %manager) : pair (big_map %metadata string bytes) (pair (address %objkt) (big_map %swaps nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))))) : list operation
+            PAIR;       # pair nat (pair (nat %fee) (address %manager)) : pair (big_map %metadata string bytes) (pair (address %objkt) (big_map %swaps nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))))) : list operation
+            PAIR;       # pair (pair nat (pair (nat %fee) (address %manager))) (pair (big_map %metadata string bytes) (pair (address %objkt) (big_map %swaps nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt))))))) : list operation
+            SWAP;       # list operation : pair (pair nat (pair (nat %fee) (address %manager))) (pair (big_map %metadata string bytes) (pair (address %objkt) (big_map %swaps nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))))))
+          }
+          {
+            IF_LEFT
+              {
+                SWAP;       # @storage : @parameter%update_fee
+                # == update_fee ==
+                # sp.verify(sp.sender == self.data.manager) # @storage : @parameter%update_fee
+                DUP;        # @storage : @storage : @parameter%update_fee
+                DUG 2;      # @storage : @parameter%update_fee : @storage
+                CAR;        # pair (nat %counter) (pair (nat %fee) (address %manager)) : @parameter%update_fee : @storage
+                GET 4;      # address : @parameter%update_fee : @storage
+                SENDER;     # @sender : address : @parameter%update_fee : @storage
+                COMPARE;    # int : @parameter%update_fee : @storage
+                EQ;         # bool : @parameter%update_fee : @storage
+                IF
+                  {}
+                  {
+                    PUSH string "WrongCondition: sp.sender == self.data.manager"; # string : @parameter%update_fee : @storage
+                    FAILWITH;   # FAILED
+                  }; # @parameter%update_fee : @storage
+                SWAP;       # @storage : @parameter%update_fee
+                # self.data.fee = params # @storage : @parameter%update_fee
+                UNPAIR;     # pair (nat %counter) (pair (nat %fee) (address %manager)) : pair (big_map %metadata string bytes) (pair (address %objkt) (big_map %swaps nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))))) : @parameter%update_fee
+                UNPAIR;     # nat : pair (nat %fee) (address %manager) : pair (big_map %metadata string bytes) (pair (address %objkt) (big_map %swaps nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))))) : @parameter%update_fee
+                SWAP;       # pair (nat %fee) (address %manager) : nat : pair (big_map %metadata string bytes) (pair (address %objkt) (big_map %swaps nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))))) : @parameter%update_fee
+                CDR;        # address : nat : pair (big_map %metadata string bytes) (pair (address %objkt) (big_map %swaps nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))))) : @parameter%update_fee
+                DIG 3;      # @parameter%update_fee : address : nat : pair (big_map %metadata string bytes) (pair (address %objkt) (big_map %swaps nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt))))))
+                PAIR;       # pair @parameter%update_fee address : nat : pair (big_map %metadata string bytes) (pair (address %objkt) (big_map %swaps nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt))))))
+                SWAP;       # nat : pair @parameter%update_fee address : pair (big_map %metadata string bytes) (pair (address %objkt) (big_map %swaps nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt))))))
+                PAIR;       # pair nat (pair @parameter%update_fee address) : pair (big_map %metadata string bytes) (pair (address %objkt) (big_map %swaps nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt))))))
+                PAIR;       # pair (pair nat (pair @parameter%update_fee address)) (pair (big_map %metadata string bytes) (pair (address %objkt) (big_map %swaps nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))))))
+              }
+              {
+                SWAP;       # @storage : @parameter%update_manager
+                # == update_manager ==
+                # sp.verify(sp.sender == self.data.manager) # @storage : @parameter%update_manager
+                DUP;        # @storage : @storage : @parameter%update_manager
+                DUG 2;      # @storage : @parameter%update_manager : @storage
+                CAR;        # pair (nat %counter) (pair (nat %fee) (address %manager)) : @parameter%update_manager : @storage
+                GET 4;      # address : @parameter%update_manager : @storage
+                SENDER;     # @sender : address : @parameter%update_manager : @storage
+                COMPARE;    # int : @parameter%update_manager : @storage
+                EQ;         # bool : @parameter%update_manager : @storage
+                IF
+                  {}
+                  {
+                    PUSH string "WrongCondition: sp.sender == self.data.manager"; # string : @parameter%update_manager : @storage
+                    FAILWITH;   # FAILED
+                  }; # @parameter%update_manager : @storage
+                SWAP;       # @storage : @parameter%update_manager
+                # self.data.manager = params # @storage : @parameter%update_manager
+                UNPAIR;     # pair (nat %counter) (pair (nat %fee) (address %manager)) : pair (big_map %metadata string bytes) (pair (address %objkt) (big_map %swaps nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))))) : @parameter%update_manager
+                UNPAIR;     # nat : pair (nat %fee) (address %manager) : pair (big_map %metadata string bytes) (pair (address %objkt) (big_map %swaps nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))))) : @parameter%update_manager
+                SWAP;       # pair (nat %fee) (address %manager) : nat : pair (big_map %metadata string bytes) (pair (address %objkt) (big_map %swaps nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))))) : @parameter%update_manager
+                CAR;        # nat : nat : pair (big_map %metadata string bytes) (pair (address %objkt) (big_map %swaps nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))))) : @parameter%update_manager
+                DIG 3;      # @parameter%update_manager : nat : nat : pair (big_map %metadata string bytes) (pair (address %objkt) (big_map %swaps nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt))))))
+                SWAP;       # nat : @parameter%update_manager : nat : pair (big_map %metadata string bytes) (pair (address %objkt) (big_map %swaps nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt))))))
+                PAIR;       # pair nat @parameter%update_manager : nat : pair (big_map %metadata string bytes) (pair (address %objkt) (big_map %swaps nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt))))))
+                SWAP;       # nat : pair nat @parameter%update_manager : pair (big_map %metadata string bytes) (pair (address %objkt) (big_map %swaps nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt))))))
+                PAIR;       # pair nat (pair nat @parameter%update_manager) : pair (big_map %metadata string bytes) (pair (address %objkt) (big_map %swaps nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt))))))
+                PAIR;       # pair (pair nat (pair nat @parameter%update_manager)) (pair (big_map %metadata string bytes) (pair (address %objkt) (big_map %swaps nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))))))
+              }; # pair (pair nat (pair nat address)) (pair (big_map %metadata string bytes) (pair (address %objkt) (big_map %swaps nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))))))
+            NIL operation; # list operation : pair (pair nat (pair nat address)) (pair (big_map %metadata string bytes) (pair (address %objkt) (big_map %swaps nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))))))
+          }; # list operation : pair (pair nat (pair nat address)) (pair (big_map %metadata string bytes) (pair (address %objkt) (big_map %swaps nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))))))
+      }; # list operation : pair (pair nat (pair nat address)) (pair (big_map %metadata string bytes) (pair (address %objkt) (big_map %swaps nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))))))
+    NIL operation; # list operation : list operation : pair (pair nat (pair nat address)) (pair (big_map %metadata string bytes) (pair (address %objkt) (big_map %swaps nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))))))
+    SWAP;       # list operation : list operation : pair (pair nat (pair nat address)) (pair (big_map %metadata string bytes) (pair (address %objkt) (big_map %swaps nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))))))
+    ITER
+      {
+        CONS;       # list operation : pair (pair nat (pair nat address)) (pair (big_map %metadata string bytes) (pair (address %objkt) (big_map %swaps nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))))))
+      }; # list operation : pair (pair nat (pair nat address)) (pair (big_map %metadata string bytes) (pair (address %objkt) (big_map %swaps nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt)))))))
+    PAIR;       # pair (list operation) (pair (pair nat (pair nat address)) (pair (big_map %metadata string bytes) (pair (address %objkt) (big_map %swaps nat (pair (pair (address %creator) (pair (address %issuer) (nat %objkt_amount))) (pair (nat %objkt_id) (pair (nat %royalties) (mutez %xtz_per_objkt))))))))
+  };
