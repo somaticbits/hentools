@@ -58,7 +58,11 @@ The CLI tool is part of a bigger project of generative art called serialCore. It
 
 The main framework used to create the CLI is [Gluegun](https://github.com/infinitered/gluegun). It allows the creation of a command line tool based on Node.js (Typescript / Javascript).
 
-The smart contract interaction is enabled through the usage of [Taquito](https://tezostaquito.io/)
+The smart contract interaction is enabled through the usage of [Taquito](https://tezostaquito.io/).  
+
+The main thought behind the creation of this project is to make it easier to use the smart contracts directly. Smart contracts are the core of Web3 technologies, and as such, are independent of any frontend associated with them.  
+
+Why creating a CLI tool instead of creating a frontend for the smart contracts? The decision comes more from a personal preference than a real reason. I've always been fascinated with using CLI and this was the perfect project to implement one. Also, the fact that there are already frontends existing for interacting with the smart contracts, made it an easier choice.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
